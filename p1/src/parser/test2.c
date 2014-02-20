@@ -84,34 +84,11 @@ int main(int argc, char *argv[])
 	char *path;
 	ssize_t nc;
 	
-	if(argc != 2)
-	{
-		printf("Uso: %s PATH\n", argv[0]);
-		return -1;
-	}
-
-	path = argv[1];
-
-	if((fd = open(path, O_RDONLY)) < 0)
-	{
-		perror("open");
-		return -1;
-	}
-	
-	if(parse_file(fd) < 0)
+	if(parse_file(1) < 0)
 	{
 		perror("parse");
 		return -1;
 	}
-
-	if(close(fd)<0)
-	{
-		perror("close");
-		return -1;
-	}
-
-
-
 
 	return 0;
 }
