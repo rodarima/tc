@@ -1,9 +1,10 @@
 CC = gcc
+CFLAGS = -g
 
 all: 	test
 
 
-test: read_line.o
+test: readl.o
 
 clean:
 	rm -f *.o test
