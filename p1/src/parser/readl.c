@@ -39,21 +39,26 @@ ssize_t readl(int fd, void *buffer, size_t nbyte)
 		while ((read_status < 0) && (errno == EINTR));
 		
 		/* Si ocurrió un error al leer, devolver dicho error. */
-		if(read_status <= 0) return read_status;
+		if(read_status < 0) return read_status;
+
+		if(read_status == 0)
+		{
+			if(i==0) return 0;
+			buf[i] = '\0';
+			return i+1;
+		}
 
 		/* read_status >= 0 */
 		if(ch == '\n' | ch == '\0')
 		{
 			/* Si llego al final de lo que debo leer, salgo */
 			buf[i] = '\0';
-			return i;
+			return i+1;
 		}
 
 		/* Si puedo proseguir, guardo el caracter leído */
 		buf[i] = ch;
 
-		/* Y sumo una letra */
-		w++;
 	}
 
 	/* Si sobrepasamos el límite sin encontrar \n o \0, overflow */

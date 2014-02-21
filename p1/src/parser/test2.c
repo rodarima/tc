@@ -9,38 +9,11 @@ int parse_rule(const char *buffer)
 {
 	char l[BUF_MAX];
 	char r[BUF_MAX];
-	if(is_std_rule(buffer))
-	{
-		printf("It seems to be a good rule...\n");
-	}
-	else
-	{
-		printf("It's that a rule?...\n");
-		return -1;
-	}
-
+	if(!is_std_rule(buffer)) return -1;
 	parse_std_left(buffer, l);
 	parse_std_right(buffer, r);
-
-	if(is_std_rule_left(l))
-	{
-		printf("It seems to be a good left part...\n");
-	}
-	else
-	{
-		printf("It's that a good left part?...\n");
-		return -1;
-	}
-
-	if(is_std_rule_right(r))
-	{
-		printf("It seems to be a good right part...\n");
-	}
-	else
-	{
-		printf("It's that a good right part?...\n");
-		return -1;
-	}
+	if(!is_std_rule_left(l)) return -1;
+	if(!is_std_rule_right(r)) return -1;
 	return 0;
 }
 
@@ -57,18 +30,9 @@ int parse_file(int fd)
 			perror("readl");
 			return -1;
 		}
-
-		if(nc==BUF_MAX)
-		{
-			printf("Overflow\n");
-			return -1;
-		}
-		else
-		{
-			printf("Parsing rule: [%s]...\n", buffer);
-		}
+		else if(nc == 0) break;
 		
-		if(parse_rule(buffer)<0)
+		if(parse_rule(buffer) < 0)
 			printf("Bad rule\n");
 		else
 			printf("Good rule\n");

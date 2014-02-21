@@ -80,7 +80,6 @@ int is_std_rule_right(const char *src)
 	for(i=0; i<strlen(src)+1; i++)
 	{
 		c = src[i];
-		printf("State %d and %c\n", state, c);
 
 		switch(state) {
 		case 0: /* At start */
@@ -143,6 +142,6 @@ int is_std_rule_right(const char *src)
 	}
 
 	/* Or here? */
-	printf("End not expected\n");
+	printf("Found '\0' at %d (not expected)\n", i);
 	return 0;
 }
