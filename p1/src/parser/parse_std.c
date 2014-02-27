@@ -7,6 +7,7 @@
 #define SYM_SEPAR	','
 #define SYM_QUOTE	'"'
 #define SYM_SPECIAL	'\\'
+#define SYM_NULL	'\0'
 
 char *equal_position(const char *str)
 {
@@ -136,6 +137,215 @@ int is_std_rule_right(const char *src)
 				return 0;
 			}
 			break;
+		default: /* How we arrived here? */
+			return 0;
+		}
+	}
+
+	/* Or here? */
+	printf("Found '\0' at %d (not expected)\n", i);
+	return 0;
+}
+
+int init_generator(const char *name, struct node_generator_t **gen)
+{
+	struct node_generator_t *g;
+	char *n;
+
+	g = (struct node_generator_t *) malloc(sizeof(*gen));
+	if(g == NULL)
+	{
+		return -1;
+	}
+
+	n = (char *) malloc(strlen(name));
+	if(n == NULL)
+	{
+		free(g);
+		return -2;
+	}
+
+	strcpy(g->name, name);
+	g->type = NODE_GEN;
+
+	(*gen) = g;
+	return 0;
+}
+
+int grammar_add_generator(const char *name, struct grammar_t *g)
+{
+	struct node_generator_t *generator_new;
+	int generators_n;
+	
+	if(init_generator(name, &generator_new) < 0)
+		return -1;
+
+	generators_n= g->generators_n;
+	printf("Comprobar que no sea el mismo generador :)\n");
+	g->generators[generators_n] = generator_new;
+	g->generators_n++;
+}
+
+/* Add the rule to the grammar. The rule must be in the right format:
+ *
+ * 	A=B,"literal",CC
+ * 	B="aa"
+ * 	CC="cc"
+ * 	CC=B
+ */
+int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
+{
+	int i, t=0;
+	char c,d;
+	int state;
+	char tmp[MAX_LINE_SIZE];
+
+
+	#define BAD_LEFT	"Syntax error while evaluating the left side of the rule. \n"
+	#define BAD_RIGTH	"Syntax error while evaluating the right side of the rule. \n"
+	#define FOUND_CHAR_AT	"Found bad char '%c' (0x%x) at position %d"
+
+	/* Get the left part of the rule */
+	state = 0;
+
+	for(i=0; i<strlen(rule)+1; i++)
+	{
+		c = rule[i];
+
+		switch(state) {
+		case 0: /* At start */
+			if(isalpha(c))
+			{
+				state = 1;
+				/* Add the first alpha to the name */
+				tmp[t++]=c;
+			}
+			else
+			{
+				printf(BAD_LEFT FOUND_CHAR_AT " (but expected alpha)\n", 
+					c, c, i);
+				return -10;
+			}
+			break;
+
+		case 1: /* At firsts chars */
+			if(isalpha(c))
+			{
+				state = 1;
+				/* Add the rest of chars to the name */
+				tmp[t++]=c;
+			}
+			else if(c == SYM_EQUAL)
+			{
+				state = 2;
+				/* End generator creation */
+				tmp[t++]='\0';
+			}
+			else
+			{
+				printf(BAD_LEFT FOUND_CHAR_AT " (but expected alpha or '%c')\n",
+					c, c, i, SYM_EQUAL);
+				return -11;
+			}
+			break;
+
+		case 2: /* At right side */
+			if(c == SYM_QUOTE)
+			{
+				state = 3;
+			}
+			else if(isalpha(c))
+			{
+				state = 6;
+				/* TODO: CREATE A NEW GENERATOR */
+				grammar_add_generator(tmp, grammar);
+			}
+			else
+			{
+				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha or '%c')\n",
+					c, c, i, SYM_QUOTE);
+				return -12;
+			}
+			break;
+
+		case 3: /* At quoted string */
+			if(c == SYM_QUOTE)
+			{
+				state = 4;
+				/* TODO: Finalize terminal here */
+			}
+			else if(c == SYM_SPECIAL)
+			{
+				state = 5;
+			}
+			else if(c == SYM_NULL)
+			{
+				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c', '%c' or the end)\n",
+					c, c, i, SYM_QUOTE, SYM_SPECIAL, SYM_NULL);
+				return -13;
+			}
+			else
+			{
+				/* TODO: Add new terminal char to the name */
+			}
+			break;
+
+		case 4: /* Ended quoted string */
+			if(c == SYM_SEPAR)
+			{
+				state = 2;
+			}
+			else if(c == SYM_NULL)
+			{
+				/* READY */
+				break;
+			}
+			else
+			{
+				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or the end)\n",
+					c, c, i, SYM_SEPAR);
+				return -14;
+			}
+			break;
+
+		case 5: /* At special char in terminal */
+			if(c == SYM_SPECIAL || c == SYM_QUOTE)
+			{
+				/* TODO: Add special char to the terminal */
+				STATE = 3;
+			}
+			else
+			{
+				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or '%c')\n",
+					c, c, i, SYM_SEPAR, SYM_QUOTE);
+				return -15;
+			}
+			break;
+
+		case 6: /* After a alpha in the right side */
+			if(isalpha(a))
+			{
+				/* TODO: Add the char to the generator name */
+			}
+			else if(c == SYM_SEPAR)
+			{
+				state = 2;
+				/* TODO: Terminate generator creation */
+			}
+			else if(c == SYM_NULL)
+			{
+				/* READY */
+				break;
+			}
+			else
+			{
+				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha, '%c' or the end)\n",
+					c, c, i, SYM_SEPAR);
+				return -16;
+			}
+			break;
+
+
 		default: /* How we arrived here? */
 			return 0;
 		}
