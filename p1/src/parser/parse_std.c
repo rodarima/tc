@@ -1,7 +1,10 @@
 #include "parse_std.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+
+#include "constants.h"
 
 #define SYM_EQUAL	'='
 #define SYM_SEPAR	','
@@ -49,9 +52,9 @@ void parse_std_left(const char *src, char *dst)
 void parse_std_right(const char *src, char *dst)
 {
 	while(*src != SYM_EQUAL) src++;
-	
+
 	src++;
-	
+
 	while(*src != '\0')
 	{
 		*dst++ = *src++;
@@ -146,7 +149,7 @@ int is_std_rule_right(const char *src)
 	printf("Found '\0' at %d (not expected)\n", i);
 	return 0;
 }
-
+/*
 int init_generator(const char *name, struct node_generator_t **gen)
 {
 	struct node_generator_t *g;
@@ -176,7 +179,7 @@ int grammar_add_generator(const char *name, struct grammar_t *g)
 {
 	struct node_generator_t *generator_new;
 	int generators_n;
-	
+
 	if(init_generator(name, &generator_new) < 0)
 		return -1;
 
@@ -185,7 +188,7 @@ int grammar_add_generator(const char *name, struct grammar_t *g)
 	g->generators[generators_n] = generator_new;
 	g->generators_n++;
 }
-
+*/
 /* Add the rule to the grammar. The rule must be in the right format:
  *
  * 	A=B,"literal",CC
@@ -208,6 +211,8 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 	/* Get the left part of the rule */
 	state = 0;
 
+	#warning "Reduce this function in subfunctions"
+
 	for(i=0; i<strlen(rule)+1; i++)
 	{
 		c = rule[i];
@@ -216,9 +221,10 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 		case 0: /* At start */
 			if(isalpha(c))
 			{
-				state = 1;
 				/* Add the first alpha to the name */
 				tmp[t++]=c;
+
+				state = 1;
 			}
 			else
 			{
@@ -232,14 +238,20 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			if(isalpha(c))
 			{
 				state = 1;
+
 				/* Add the rest of chars to the name */
-				tmp[t++]=c;
+				tmp[t++] = c;
 			}
 			else if(c == SYM_EQUAL)
 			{
-				state = 2;
 				/* End generator creation */
 				tmp[t++]='\0';
+				printf("New variable (rule) called'%s'\n", tmp);
+
+				/* TODO: Terminate generator creation */
+
+				state = 2;
+				t = 0;
 			}
 			else
 			{
@@ -256,9 +268,10 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(isalpha(c))
 			{
+				/* Add start symbol of the variable */
+				tmp[t++] = c;
+
 				state = 6;
-				/* TODO: CREATE A NEW GENERATOR */
-				grammar_add_generator(tmp, grammar);
 			}
 			else
 			{
@@ -271,8 +284,14 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 		case 3: /* At quoted string */
 			if(c == SYM_QUOTE)
 			{
+				/* End terminal here */
+				tmp[t++] = '\0';
+				printf("New terminal called '%s'\n", tmp);
+
+				/* TODO: Add new terminal */
+
 				state = 4;
-				/* TODO: Finalize terminal here */
+				t = 0;
 			}
 			else if(c == SYM_SPECIAL)
 			{
@@ -286,7 +305,8 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
-				/* TODO: Add new terminal char to the name */
+				/* Add new terminal char to the name */
+				tmp[t++] = c;
 			}
 			break;
 
@@ -297,8 +317,10 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(c == SYM_NULL)
 			{
-				/* READY */
-				break;
+				/* ---------- READY --------- */
+				printf("READY FOR ROCK!\n");
+
+				return 0;
 			}
 			else
 			{
@@ -311,8 +333,10 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 		case 5: /* At special char in terminal */
 			if(c == SYM_SPECIAL || c == SYM_QUOTE)
 			{
-				/* TODO: Add special char to the terminal */
-				STATE = 3;
+				/* Add special char to the terminal */
+				tmp[t++] = c;
+
+				state = 3;
 			}
 			else
 			{
@@ -323,19 +347,33 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			break;
 
 		case 6: /* After a alpha in the right side */
-			if(isalpha(a))
+			if(isalpha(c))
 			{
-				/* TODO: Add the char to the generator name */
+				/* Add the char to the generator name */
+				tmp[t++] = c;
 			}
 			else if(c == SYM_SEPAR)
 			{
+				/* End variable creation */
+				tmp[t++] = '\0';
+				printf("New variable called '%s'\n", tmp);
+
+				/* TODO: Add new variable */
+
 				state = 2;
-				/* TODO: Terminate generator creation */
+				t = 0;
 			}
 			else if(c == SYM_NULL)
 			{
-				/* READY */
-				break;
+				tmp[t++] = '\0';
+				printf("Last variable called '%s'\n", tmp);
+
+				/* TODO: Add new variable */
+
+				/* ---------- READY --------- */
+				printf("READY FOR ROCK!\n");
+
+				return 0;
 			}
 			else
 			{
@@ -347,11 +385,12 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 
 
 		default: /* How we arrived here? */
-			return 0;
+			printf("FATAL ERROR, bug detected\n");
+			return -20;
 		}
 	}
 
 	/* Or here? */
 	printf("Found '\0' at %d (not expected)\n", i);
-	return 0;
+	return -21;
 }

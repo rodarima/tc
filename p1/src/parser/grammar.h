@@ -32,6 +32,6 @@ struct grammar_t
 	/* Símbolos terminales */
 	struct node_symbol_t *terminals;
 	size_t terminals_n;
-}
+};
 
 #endif	/* GRAMMAR_H */

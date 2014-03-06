@@ -5,6 +5,7 @@
 #include "parse_std.h"
 #define BUF_MAX	1024
 
+/*
 int parse_rule(const char *buffer)
 {
 	char l[BUF_MAX];
@@ -16,6 +17,7 @@ int parse_rule(const char *buffer)
 	if(!is_std_rule_right(r)) return -1;
 	return 0;
 }
+*/
 
 int parse_file(int fd)
 {
@@ -32,7 +34,7 @@ int parse_file(int fd)
 		}
 		else if(nc == 0) break;
 		
-		if(parse_rule(buffer) < 0)
+		if(parse_std_add_rule(buffer, NULL) < 0)
 			printf("Bad rule\n");
 		else
 			printf("Good rule\n");
