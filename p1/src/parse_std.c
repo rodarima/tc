@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #include "constants.h"
+#include "grammar.h"
 
 #define SYM_EQUAL	'='
 #define SYM_SEPAR	','
@@ -202,6 +203,9 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 	char c,d;
 	int state;
 	char tmp[MAX_LINE_SIZE];
+	/* TODO: Change this pointers to static memory, adding at the end */
+	struct connector_t *conn, *conn2;
+	struct symbol_t *sym;
 
 
 	#define BAD_LEFT	"Syntax error while evaluating the left side of the rule. \n"
@@ -244,11 +248,14 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(c == SYM_EQUAL)
 			{
-				/* End generator creation */
+				/* End variable creation */
 				tmp[t++]='\0';
 				printf("New variable (rule) called'%s'\n", tmp);
 
-				/* TODO: Terminate generator creation */
+				/* Terminate variable creation */
+				sym = grammar_variable_new(grammar, tmp);
+				grammar_connector_init(&conn);
+				conn->from = sym;
 
 				state = 2;
 				t = 0;
@@ -275,6 +282,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha or '%c')\n",
 					c, c, i, SYM_QUOTE);
 				return -12;
@@ -288,7 +296,9 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				tmp[t++] = '\0';
 				printf("New terminal called '%s'\n", tmp);
 
-				/* TODO: Add new terminal */
+				/* Add new terminal */
+				sym = grammar_terminal_new(grammar, tmp);
+				conn->to1 = sym;
 
 				state = 4;
 				t = 0;
@@ -299,6 +309,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(c == SYM_NULL)
 			{
+				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c', '%c' or the end)\n",
 					c, c, i, SYM_QUOTE, SYM_SPECIAL, SYM_NULL);
 				return -13;
@@ -313,10 +324,22 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 		case 4: /* Ended quoted string */
 			if(c == SYM_SEPAR)
 			{
+				/* Concatenate more symbols or terminals */
+
+				grammar_connector_init(&conn2);
+				conn->to2 = conn2;
+				conn2->from = conn;
+				grammar_connector_add(grammar, conn);
+				conn = conn2;
+				conn2 = NULL;
+
 				state = 2;
 			}
 			else if(c == SYM_NULL)
 			{
+				/* Add connector */
+				grammar_connector_add(grammar, conn);
+
 				/* ---------- READY --------- */
 				printf("READY FOR ROCK!\n");
 
@@ -324,6 +347,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or the end)\n",
 					c, c, i, SYM_SEPAR);
 				return -14;
@@ -340,6 +364,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or '%c')\n",
 					c, c, i, SYM_SEPAR, SYM_QUOTE);
 				return -15;
@@ -358,7 +383,17 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				tmp[t++] = '\0';
 				printf("New variable called '%s'\n", tmp);
 
-				/* TODO: Add new variable */
+				/* Add new variable */
+				sym = grammar_variable_new(grammar, tmp);
+				conn->to1 = sym;
+
+				/* Concatenate more symbols or terminals */
+				grammar_connector_init(&conn2);
+				conn->to2 = conn2;
+				conn2->from = conn;
+				grammar_connector_add(grammar, conn);
+				conn = conn2;
+				conn2 = NULL;
 
 				state = 2;
 				t = 0;
@@ -368,7 +403,12 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				tmp[t++] = '\0';
 				printf("Last variable called '%s'\n", tmp);
 
-				/* TODO: Add new variable */
+				/* Add new variable */
+				sym = grammar_variable_new(grammar, tmp);
+				conn->to1 = sym;
+
+				/* Add connector */
+				grammar_connector_add(grammar, conn);
 
 				/* ---------- READY --------- */
 				printf("READY FOR ROCK!\n");
@@ -377,6 +417,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha, '%c' or the end)\n",
 					c, c, i, SYM_SEPAR);
 				return -16;

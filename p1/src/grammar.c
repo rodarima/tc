@@ -8,10 +8,12 @@
 
 int grammar_init(struct grammar_t **g);
 void grammar_free(struct grammar_t *g);
+void grammar_print(struct grammar_t *g);
 
 int grammar_connector_init(struct connector_t **connector);
 void grammar_connector_free(struct connector_t *connector);
 int grammar_connector_add(struct grammar_t *g, struct connector_t *c);
+void grammar_connector_print(struct connector_t *c);
 
 static int grammar_variable_init(const char *name, struct symbol_t **symbol);
 void *grammar_variable_new(struct grammar_t *g, const char *name);
@@ -23,6 +25,7 @@ static void *grammar_terminal_find(struct grammar_t *g, const char *name);
 
 static int grammar_symbol_init(const char *name, struct symbol_t **symbol, int type);
 void grammar_symbol_free(struct symbol_t *symbol);
+void grammar_symbol_print(struct symbol_t *s);
 
 
 int grammar_init(struct grammar_t **g)
@@ -52,27 +55,58 @@ void grammar_free(struct grammar_t *g)
 	if(g)
 	{
 		if(g->connectors)
+		{
 			for(i=0; i<g->connectors_n; i++)
 			{
 				grammar_connector_free(g->connectors[i]);
 			}
 			free(g->connectors);
-
+		}
 		if(g->variables)
+		{
 			for(i=0; i<g->variables_n; i++)
 			{
 				grammar_symbol_free(g->variables[i]);
 			}
 			free(g->variables);
-
+		}
 		if(g->terminals)
+		{
 			for(i=0; i<g->terminals_n; i++)
 			{
 				grammar_symbol_free(g->terminals[i]);
 			}
 			free(g->terminals);
-
+		}
 		free(g);
+	}
+}
+
+void grammar_print(struct grammar_t *g)
+{
+	int i;
+
+	if(g->connectors)
+	{
+		for(i=0; i<g->connectors_n; i++)
+		{
+			grammar_connector_print(g->connectors[i]);
+		}
+	}
+	if(g->variables)
+	{
+		for(i=0; i<g->variables_n; i++)
+		{
+			grammar_symbol_print(g->variables[i]);
+
+		}
+	}
+	if(g->terminals)
+	{
+		for(i=0; i<g->terminals_n; i++)
+		{
+			grammar_symbol_print(g->terminals[i]);
+		}
 	}
 }
 
@@ -126,6 +160,49 @@ int grammar_connector_add(struct grammar_t *g, struct connector_t *c)
 	g->connectors_n = n;
 
 	return 0;
+}
+
+void grammar_node_print(void *node)
+{
+	if(!node) printf("NULL");
+	int type = *((char*) node);
+	switch(type)
+	{
+		case NODE_VAR:
+			printf("VAR(%s)", ((struct symbol_t *)node)->name);
+			break;
+		case NODE_TER:
+			printf("TER(%s)", ((struct symbol_t *)node)->name);
+			break;
+		case NODE_CON:
+			printf("CON(%p)", node);
+			break;
+		default:
+			printf("ERROR, type not identified");
+			break;
+	}
+}
+
+void grammar_connector_print(struct connector_t *c)
+{
+	if(c->to2 == NULL)
+	{
+		printf("Simple connector  [%p]: ",c);
+		grammar_node_print(c->from);
+		printf(" -> ");
+		grammar_node_print(c->to1);
+		printf("\n");
+	}
+	else
+	{
+		printf("Complex connector [%p]: ",c);
+		grammar_node_print(c->from);
+		printf(" -> ");
+		grammar_node_print(c->to1);
+		printf(" +-> ");
+		grammar_node_print(c->to2);
+		printf("\n");
+	}
 }
 
 
@@ -282,8 +359,20 @@ void grammar_symbol_free(struct symbol_t *symbol)
 	}
 }
 
+void grammar_symbol_print(struct symbol_t *s)
+{
+	if(s->type == NODE_VAR)
+	{
+		printf("Variable [%p]: %s\n", s, s->name);
+	}
+	else
+	{
+		printf("Terminal [%p]: %s\n", s, s->name);
+	}
+}
 
 
+/*
 int main(int argc, char *argv[])
 {
 	struct grammar_t *g;
@@ -311,3 +400,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+*/

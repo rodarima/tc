@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include "readl.h"
 #include "parse_std.h"
+#include "grammar.h"
+
 #define BUF_MAX	1024
 
 /*
@@ -19,7 +21,7 @@ int parse_rule(const char *buffer)
 }
 */
 
-int parse_file(int fd)
+int parse_file(int fd, struct grammar_t *g)
 {
 	char buffer[BUF_MAX];
 	ssize_t nc;
@@ -34,10 +36,14 @@ int parse_file(int fd)
 		}
 		else if(nc == 0) break;
 		
-		if(parse_std_add_rule(buffer, NULL) < 0)
+		if(parse_std_add_rule(buffer, g) < 0)
 			printf("Bad rule\n");
 		else
+		{
 			printf("Good rule\n");
+			printf("GRAMMAR:\n");
+			grammar_print(g);
+		}
 	}
 	while(nc > 0);
 
@@ -49,12 +55,21 @@ int main(int argc, char *argv[])
 	int fd,i;
 	char *path;
 	ssize_t nc;
+	struct grammar_t *g;
 	
-	if(parse_file(1) < 0)
+
+	if(grammar_init(&g) < 0)
+	{
+		return -1;
+	}
+
+	if(parse_file(1, g) < 0)
 	{
 		perror("parse");
 		return -1;
 	}
+
+	grammar_free(g);
 
 	return 0;
 }
