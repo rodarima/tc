@@ -1,0 +1,15 @@
+A=B,"b"
+B="b"
+A=G
+A=F
+A=D
+A=D
+D=C
+D=C
+C=A
+F=F,"a"
+F="a"
+C="c"
+H="d"
+R=J
+J=K

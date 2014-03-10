@@ -250,7 +250,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			{
 				/* End variable creation */
 				tmp[t++]='\0';
-				printf("New variable (rule) called'%s'\n", tmp);
+				//printf("New variable (rule) called'%s'\n", tmp);
 
 				/* Terminate variable creation */
 				sym = grammar_variable_new(grammar, tmp);
@@ -294,11 +294,11 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			{
 				/* End terminal here */
 				tmp[t++] = '\0';
-				printf("New terminal called '%s'\n", tmp);
+				//printf("New terminal called '%s'\n", tmp);
 
 				/* Add new terminal */
 				sym = grammar_terminal_new(grammar, tmp);
-				conn->to1 = sym;
+				conn->sym = sym;
 
 				state = 4;
 				t = 0;
@@ -327,7 +327,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				/* Concatenate more symbols or terminals */
 
 				grammar_connector_init(&conn2);
-				conn->to2 = conn2;
+				conn->con = conn2;
 				conn2->from = conn;
 				grammar_connector_add(grammar, conn);
 				conn = conn2;
@@ -341,7 +341,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				grammar_connector_add(grammar, conn);
 
 				/* ---------- READY --------- */
-				printf("READY FOR ROCK!\n");
+				//printf("READY FOR ROCK!\n");
 
 				return 0;
 			}
@@ -381,15 +381,15 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			{
 				/* End variable creation */
 				tmp[t++] = '\0';
-				printf("New variable called '%s'\n", tmp);
+				//printf("New variable called '%s'\n", tmp);
 
 				/* Add new variable */
 				sym = grammar_variable_new(grammar, tmp);
-				conn->to1 = sym;
+				conn->sym = sym;
 
 				/* Concatenate more symbols or terminals */
 				grammar_connector_init(&conn2);
-				conn->to2 = conn2;
+				conn->con = conn2;
 				conn2->from = conn;
 				grammar_connector_add(grammar, conn);
 				conn = conn2;
@@ -401,17 +401,17 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			else if(c == SYM_NULL)
 			{
 				tmp[t++] = '\0';
-				printf("Last variable called '%s'\n", tmp);
+				//printf("Last variable called '%s'\n", tmp);
 
 				/* Add new variable */
 				sym = grammar_variable_new(grammar, tmp);
-				conn->to1 = sym;
+				conn->sym = sym;
 
 				/* Add connector */
 				grammar_connector_add(grammar, conn);
 
 				/* ---------- READY --------- */
-				printf("READY FOR ROCK!\n");
+				//printf("READY FOR ROCK!\n");
 
 				return 0;
 			}

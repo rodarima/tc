@@ -27,6 +27,8 @@ static int grammar_symbol_init(const char *name, struct symbol_t **symbol, int t
 void grammar_symbol_free(struct symbol_t *symbol);
 void grammar_symbol_print(struct symbol_t *s);
 
+void grammar_node_print(void *node);
+
 
 int grammar_init(struct grammar_t **g)
 {
@@ -125,8 +127,8 @@ int grammar_connector_init(struct connector_t **connector)
 
 	c->type = NODE_CON;
 	c->from = NULL;
-	c->to1 = NULL;
-	c->to2 = NULL;
+	c->sym = NULL;
+	c->con = NULL;
 
 	*connector = c;
 	return 0;
@@ -165,7 +167,7 @@ int grammar_connector_add(struct grammar_t *g, struct connector_t *c)
 void grammar_node_print(void *node)
 {
 	if(!node) printf("NULL");
-	int type = *((char*) node);
+	int type = *((char*) node) & 0x03;
 	switch(type)
 	{
 		case NODE_VAR:
@@ -182,15 +184,19 @@ void grammar_node_print(void *node)
 			break;
 	}
 }
+char grammar_node_type(void *node)
+{
+	return *((char*) node);
+}
 
 void grammar_connector_print(struct connector_t *c)
 {
-	if(c->to2 == NULL)
+	if(c->con == NULL)
 	{
 		printf("Simple connector  [%p]: ",c);
 		grammar_node_print(c->from);
 		printf(" -> ");
-		grammar_node_print(c->to1);
+		grammar_node_print(c->sym);
 		printf("\n");
 	}
 	else
@@ -198,9 +204,9 @@ void grammar_connector_print(struct connector_t *c)
 		printf("Complex connector [%p]: ",c);
 		grammar_node_print(c->from);
 		printf(" -> ");
-		grammar_node_print(c->to1);
+		grammar_node_print(c->sym);
 		printf(" +-> ");
-		grammar_node_print(c->to2);
+		grammar_node_print(c->con);
 		printf("\n");
 	}
 }
@@ -361,16 +367,160 @@ void grammar_symbol_free(struct symbol_t *symbol)
 
 void grammar_symbol_print(struct symbol_t *s)
 {
-	if(s->type == NODE_VAR)
+	if(NODE_IS_TYPE(s, NODE_VAR))
 	{
 		printf("Variable [%p]: %s\n", s, s->name);
 	}
-	else
+	else if(NODE_IS_TYPE(s, NODE_TER))
 	{
 		printf("Terminal [%p]: %s\n", s, s->name);
 	}
+	else
+	{
+		printf("ERROR, unknown type [%p]\n", s);
+	}
 }
 
+/* Asegura que todas las variables sean generadores, es decir, que se puedan
+ * transformar en un símbolo terminal */
+int grammar_clean_no_generators(struct grammar_t *g)
+{
+	/* Recorro todos los terminales */
+	void **list = NULL;
+	size_t list_n = 0;
+
+	long i, j;
+	struct connector_t *con;
+	struct symbol_t *sym;
+	void *node;
+
+	printf("Cleanning no-generators\n");
+
+	for(i=0; i < g->connectors_n; i++)
+	{
+		con = g->connectors[i];
+		
+		for(j=0; j < g->terminals_n; j++)
+		{
+			sym = g->terminals[j];
+
+			/* Si la conexión termina en un terminal, y el emisor
+			 * no está marcado, añadir el emisor */
+			if((con->sym == sym) && !NODE_IS_MARKED(con->from, MARK_PASS))
+			{
+				/* TODO: Add sym->from to the list */
+				#warning "TODO: Create a GOOD list"
+				
+				list = realloc(list, ++list_n * sizeof(*list));
+				if(!list)
+				{
+					perror("realloc");
+					free(list);
+					return -1;
+				}
+				printf("From ");
+				grammar_node_print(sym);
+				printf(" adding ");
+				grammar_node_print(con->from);
+				printf("\n");
+
+				/* Marcar el emisor */
+				NODE_MARK(con->from, MARK_PASS);
+				/* Añadir el emisor */
+				list[list_n-1] = con->from;
+
+				/* Salimos, ya que una conexión sólo puede
+				 * desembocar en un sólo símbolo */
+				break;
+			}
+		}
+	}
+	/* Mientras sigan existiendo nodos que explorar */
+	while(list_n > 0)
+	{
+		/* Elijo el último para avanzar en profundidad */
+		node = list[list_n-1];
+
+		/* Si es un conector ya tendrá la referencia con el padre */
+		if(NODE_IS_TYPE(node, NODE_CON))
+		{
+			con = node;
+			/* Marcar al padre */
+			NODE_MARK(con->from, MARK_PASS);
+			/* Añadir al padre */
+			list[list_n-1] = con->from;
+
+			/* Fin */
+			continue;
+		}
+		if(!NODE_IS_TYPE(node, NODE_VAR))
+		{
+			printf("FATAL: ESTO NUNCA DEBE SUCEDER\n");
+		}
+		
+		/* Si no, es una variable y busco enlaces que terminen en el */
+		
+		sym = node;
+		
+		/* Extraigo el nodo de la lista */
+		list_n--;
+
+		for(i=0; i < g->connectors_n; i++)
+		{
+			con = g->connectors[i];
+			
+			/* Si encontramos una conexión con el nodo que no esté marcada */
+			if((con->sym == sym) && !NODE_IS_MARKED(con->from, MARK_PASS))
+			{
+				/* Lo añadimos a la lista, sobreescribiendo el actual */
+				list = realloc(list, ++list_n * sizeof(*list));
+				if(!list)
+				{
+					perror("realloc");
+					free(list);
+					return -1;
+				}
+				printf("From ");
+				grammar_node_print(sym);
+				printf(" adding ");
+				grammar_node_print(con->from);
+				printf("\n");
+
+				/* Marcar el emisor */
+				NODE_MARK(con->from, MARK_PASS);
+				/* Añadir el emisor */
+				list[list_n-1] = con->from;
+				
+			}
+		}
+
+	}
+
+	if(list) free(list);
+
+	printf("Marked variables are:\n");
+	for(i=0; i<g->variables_n; i++)
+	{
+		sym = g->variables[i];
+		if(NODE_IS_MARKED(sym, MARK_PASS))
+		{
+			grammar_symbol_print(sym);
+		}
+	}
+	printf("Unmarked variables are:\n");
+	for(i=0; i<g->variables_n; i++)
+	{
+		sym = g->variables[i];
+		if(!NODE_IS_MARKED(sym, MARK_PASS))
+		{
+			grammar_symbol_print(sym);
+		}
+	}
+
+
+	return 0;
+
+}
 
 /*
 int main(int argc, char *argv[])
@@ -392,7 +542,7 @@ int main(int argc, char *argv[])
 
 	grammar_connector_init(&c);
 	c->from = A;
-	c->to1 = B;
+	c->sym = B;
 
 	grammar_connector_add(g, c);
 

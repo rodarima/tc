@@ -35,17 +35,19 @@ int parse_file(int fd, struct grammar_t *g)
 			return -1;
 		}
 		else if(nc == 0) break;
+
+		printf("Adding rule %s\n", buffer);
 		
 		if(parse_std_add_rule(buffer, g) < 0)
-			printf("Bad rule\n");
-		else
 		{
-			printf("Good rule\n");
-			printf("GRAMMAR:\n");
-			grammar_print(g);
+			printf("Bad rule\n");
+			return -1;
 		}
 	}
 	while(nc > 0);
+
+	grammar_print(g);
+	grammar_clean_no_generators(g);
 
 	return 0;
 }
@@ -57,13 +59,26 @@ int main(int argc, char *argv[])
 	ssize_t nc;
 	struct grammar_t *g;
 	
+	if(argc == 2)
+	{
+		fd = open(argv[1], O_RDONLY);
+		if(fd <0)
+		{
+			perror("open");
+			return -1;
+		}
+	}
+	else
+	{
+		fd = 1;
+	}
 
 	if(grammar_init(&g) < 0)
 	{
 		return -1;
 	}
 
-	if(parse_file(1, g) < 0)
+	if(parse_file(fd, g) < 0)
 	{
 		perror("parse");
 		return -1;
