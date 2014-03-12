@@ -19,11 +19,12 @@ struct list_t
 
 /* Functions over the linked list */
 
-/* Create a empty list */
-int list_init(struct list_t **list_addr);
 
-/* Free a list structure */
-void list_free(struct list_t *list);
+/* Make a list empty */
+void list_empty(struct list_t *list);
+
+/* Delete all elements in a list */
+void list_clear(struct list_t *list);
 
 /* Create a new node, with 'ptr' contents */
 int list_node_init(struct list_node_t **node_addr, void *ptr);

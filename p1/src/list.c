@@ -2,29 +2,20 @@
 
 #include <stdlib.h>
 
-/* Create a empty list */
-int list_init(struct list_t **list_addr)
+/* Make a list empty */
+void list_empty(struct list_t *list)
 {
-	struct list_t *_list_addr;
-
-	_list_addr = malloc(sizeof(struct list_t));
-	if(!_list_addr) return -1;
-
-	_list_addr->start = NULL;
-	_list_addr->end = NULL;
-
-	*list_addr = _list_addr;
-	return 0;
+	list->start = NULL;
+	list->end = NULL;
 }
 
-/* Free a list structure */
-void list_free(struct list_t *list)
+/* Delete all elements in a list */
+void list_clear(struct list_t *list)
 {
 	while(list->start)
 	{
 		list_remove(list, list->start);
 	}
-	free(list);
 }
 
 /* Create a new node, with 'ptr' contents */
