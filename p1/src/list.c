@@ -41,6 +41,19 @@ void list_clear_func(struct list_t *list, void (*func)(void *))
 	list_empty(list);
 }
 
+/* Apply func to all elements in the list */
+void list_map_func(struct list_t *list, void (*func)(void *))
+{
+	struct list_node_t *node;
+	
+	node = list->start;
+	while(node)
+	{
+		(func)(node->ptr);
+		node = node->next;
+	}
+}
+
 /* Create a new node, with 'ptr' contents */
 int list_node_init(struct list_node_t **node_addr, void *ptr)
 {
