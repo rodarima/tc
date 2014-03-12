@@ -42,7 +42,7 @@ void list_clear_func(struct list_t *list, void (*func)(void *))
 }
 
 /* Apply func to all elements in the list */
-void list_map_func(struct list_t *list, void (*func)(void *))
+void list_map(struct list_t *list, void (*func)(void *))
 {
 	struct list_node_t *node;
 	
