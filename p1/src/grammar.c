@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "grammar.h"
+#include "dbg.h"
 
 int grammar_init(struct grammar_t **g);
 void grammar_free(struct grammar_t *g);
@@ -32,112 +33,62 @@ void grammar_node_print(void *node);
 
 int grammar_init(struct grammar_t **g)
 {
-	struct grammar_t *grammar;
+	*g = (struct grammar_t *) calloc(1, sizeof(*grammar));
 
-	grammar = (struct grammar_t *) malloc(sizeof(*grammar));
-
-	if(!grammar)
-	{
-		perror("malloc");
-		return -1;
-	}
-
-	/* Fill all with 0's and NULL */
-	memset(grammar, 0, sizeof(*grammar));
-
-	*g = grammar;
+	return_if(!*g, -1);
 
 	return 0;
 }
 
 void grammar_free(struct grammar_t *g)
 {
-	int i;
-
-	if(g)
-	{
-		if(g->connectors)
-		{
-			for(i=0; i<g->connectors_n; i++)
-			{
-				grammar_connector_free(g->connectors[i]);
-			}
-			free(g->connectors);
-		}
-		if(g->variables)
-		{
-			for(i=0; i<g->variables_n; i++)
-			{
-				grammar_symbol_free(g->variables[i]);
-			}
-			free(g->variables);
-		}
-		if(g->terminals)
-		{
-			for(i=0; i<g->terminals_n; i++)
-			{
-				grammar_symbol_free(g->terminals[i]);
-			}
-			free(g->terminals);
-		}
-		free(g);
-	}
+	list_clear(&(g->connectors));
+	list_clear_func(&(g->variables), grammar_symbol_free);
+	list_clear_func(&(g->terminals), grammar_symbol_free);
+	free(g);
 }
 
 void grammar_print(struct grammar_t *g)
 {
-	int i;
-
-	if(g->connectors)
-	{
-		for(i=0; i<g->connectors_n; i++)
-		{
-			grammar_connector_print(g->connectors[i]);
-		}
-	}
-	if(g->variables)
-	{
-		for(i=0; i<g->variables_n; i++)
-		{
-			grammar_symbol_print(g->variables[i]);
-
-		}
-	}
-	if(g->terminals)
-	{
-		for(i=0; i<g->terminals_n; i++)
-		{
-			grammar_symbol_print(g->terminals[i]);
-		}
-	}
+	list_map(&(g->connectors), grammar_connector_print);
+	list_map(&(g->variables), grammar_connector_print);
+	list_map(&(g->terminals), grammar_connector_print);
 }
 
-
-
-int grammar_connector_init(struct connector_t **connector)
+int grammar_connector_new(struct grammar_t *g, struct connector_t **connector)
 {
-	struct connector_t *c;
-
-	c = malloc(sizeof(*c));
-	if(c == NULL)
-	{
-		perror("malloc");
-		return -1;
-	}
+	*connector = calloc(1, sizeof(*c));
+	return_if(!*connector, -1);
 
 	c->type = NODE_CON;
-	c->from = NULL;
-	c->sym = NULL;
-	c->con = NULL;
 
-	*connector = c;
+	return_if(list_add(&(g->connectors), (void *) *connector), -1);
+
 	return 0;
 }
 
 void grammar_connector_free(struct connector_t *connector)
 {
-	if(connector) free(connector);
+	struct connector_t *tmp;
+
+	if(connector->from)
+	{
+		if((tmp = list_find(&(connector->from->to), connector)) != NULL)
+		{
+			list->remove(&(connector->from->to), tmp);
+		}
+	}
+	free(connector);
 }
+
+int grammar_cmp_ptr(void *a, void *b)
+{
+	return a==b;
+}
+
+
+
+
 
 int grammar_connector_add(struct grammar_t *g, struct connector_t *c)
 {
@@ -166,8 +117,9 @@ int grammar_connector_add(struct grammar_t *g, struct connector_t *c)
 
 void grammar_node_print(void *node)
 {
-	if(!node) printf("NULL");
-	int type = *((char*) node) & 0x03;
+	int type;
+
+	type = *((char*) node) & 0x03;
 	switch(type)
 	{
 		case NODE_VAR:
@@ -355,14 +307,10 @@ static int grammar_symbol_init(const char *name, struct symbol_t **symbol, int t
 
 void grammar_symbol_free(struct symbol_t *symbol)
 {
-	if(symbol)
-	{
-		if(symbol->name)
-		{
-			free(symbol->name);
-		}
-		free(symbol);
-	}
+	list_clear(&(symbol->to));
+	list_clear(&(symbol->from));
+	free(symbol->name);
+	free(symbol);
 }
 
 void grammar_symbol_print(struct symbol_t *s)

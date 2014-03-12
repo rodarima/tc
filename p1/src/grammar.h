@@ -17,35 +17,47 @@
 
 struct symbol_t
 {
-	char type;	/* Tipo de nodo */
-	char *name;	/* Nombre asignado al símbolo */
+	/* Type of symbol */
+	char type;
+
+	/* Node name */
+	char *name;
+
+	/* Connections to others nodes */
+	struct list_t to;
+
+	/* Connections from others nodes */
+	struct list_t from;
 };
 
 struct connector_t
 {
 	/* Tipo conector */
 	char type;
+
 	/* De donde viene la conexion, conector o variable */
 	void *from;
+	
 	/* A donde va 1 */
 	struct symbol_t *sym;
+	
 	/* A donde va 2 */
 	struct connector_t *con;	
 };
 
 struct grammar_t
 {
+	/* Start symbol */
+	struct symbol_t *start;
+
 	/* Conexiones */
-	struct connector_t **connectors;
-	long connectors_n;
+	struct list_t connectors;
 
 	/* Símbolos no-terminales. El primero será el inicial */
-	struct symbol_t **variables;
-	long variables_n;
+	struct list_t variables;
 
 	/* Símbolos terminales */
-	struct symbol_t **terminals;
-	long terminals_n;
+	struct list_t terminals;
 };
 
 
