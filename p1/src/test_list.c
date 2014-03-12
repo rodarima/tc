@@ -1,6 +1,6 @@
 #include "list.h"
 #include <stdio.h>
-//#include <string.h>
+#include <string.h>
 #include <stdlib.h>
 
 int main(int argc, char *argv[])
@@ -62,6 +62,20 @@ int main(int argc, char *argv[])
 		printf("list.end != c\n");
 		return -1;
 	}
+	/**************************************************************/
+
+	if(list_find(&list, "a", strcmp) != a)
+	{
+		printf("list_find(&list, 'a', strcmp) != a\n");
+		return -1;
+	}
+	if(list_find(&list, "aa", strcmp) != NULL)
+	{
+		printf("list_find(&list, 'aa', strcmp) != NULL\n");
+		return -1;
+	}
+
+
 	list_remove(&list, b);
 	if(list.start != a)
 	{

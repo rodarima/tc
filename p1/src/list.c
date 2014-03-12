@@ -54,6 +54,20 @@ void list_map(struct list_t *list, void (*func)(void *))
 	}
 }
 
+/* Search a element in the list */
+struct list_node_t *list_find(struct list_t *list, void *ptr, int (*cmp)(void *, void *))
+{
+	struct list_node_t *node;
+	
+	node = list->start;
+	while(node)
+	{
+		if((cmp)(ptr, node->ptr) == 0) return node;
+		node = node->next;
+	}
+	return NULL;
+}
+
 /* Create a new node, with 'ptr' contents */
 int list_node_init(struct list_node_t **node_addr, void *ptr)
 {

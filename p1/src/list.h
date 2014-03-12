@@ -29,6 +29,9 @@ void list_clear(struct list_t *list);
 /* Delete all elements in a list, and apply func before */
 void list_clear_func(struct list_t *list, void (*func)(void *));
 
+/* Search a element in the list */
+struct list_node_t *list_find(struct list_t *list, void *ptr, int (*cmp)(void *, void *));
+
 /* Apply func to all elements in the list */
 void list_map(struct list_t *list, void (*func)(void *));
 
