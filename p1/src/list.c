@@ -1,6 +1,7 @@
 #include "list.h"
 
 #include <stdlib.h>
+#include "dbg.h"
 
 /* Make a list empty */
 void list_empty(struct list_t *list)
@@ -12,10 +13,32 @@ void list_empty(struct list_t *list)
 /* Delete all elements in a list */
 void list_clear(struct list_t *list)
 {
-	while(list->start)
+	struct list_node_t *node, *node2;
+
+	node = list->start;
+	while(node)
 	{
-		list_remove(list, list->start);
+		node2 = node->next;
+		list_node_free(node);
+		node = node2;
 	}
+	list_empty(list);
+}
+
+/* Delete all elements in a list, and apply func before */
+void list_clear_func(struct list_t *list, void (*func)(void *))
+{
+	struct list_node_t *node, *node2;
+	
+	node = list->start;
+	while(node)
+	{
+		node2 = node->next;
+		(func)(node->ptr);
+		list_node_free(node);
+		node = node2;
+	}
+	list_empty(list);
 }
 
 /* Create a new node, with 'ptr' contents */
@@ -41,7 +64,7 @@ void list_node_free(struct list_node_t *node)
 }
 
 /* Adds a already created node to the end of the list */
-void list_add(struct list_t *list, struct list_node_t *node)
+void list_node_add(struct list_t *list, struct list_node_t *node)
 {
 	node->prev = list->end;
 	node->next = NULL;
@@ -54,6 +77,17 @@ void list_add(struct list_t *list, struct list_node_t *node)
 	{
 		list->start = node;
 	}
+}
+
+/* Create a new node, and adds it to the list */
+int list_add(struct list_t *list, void *ptr)
+{
+	struct list_node_t *node;
+	
+	return_if(list_node_init(&node, ptr), -1);
+	list_node_add(list, node);
+
+	return 0;
 }
 
 /* Remove node from the list */

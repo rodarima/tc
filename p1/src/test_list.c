@@ -1,6 +1,7 @@
 #include "list.h"
 #include <stdio.h>
 //#include <string.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	list_add(&list, a);
+	list_node_add(&list, a);
 	if(list.start != a)
 	{
 		printf("list.start != a\n");
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
 		printf("list.end != a\n");
 		return -1;
 	}
-	list_add(&list, b);
+	list_node_add(&list, b);
 	if(list.start != a)
 	{
 		printf("list.start != a\n");
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
 		printf("list.end != b\n");
 		return -1;
 	}
-	list_add(&list, c);
+	list_node_add(&list, c);
 	if(list.start != a)
 	{
 		printf("list.start != a\n");
@@ -100,8 +101,16 @@ int main(int argc, char *argv[])
 		perror("list_node_init");
 		return -1;
 	}
-	list_add(&list, a);
+	list_node_add(&list, a);
 	list_clear(&list);
+	char *str = malloc(10);
+	if(list_node_init(&a, str) < 0)
+	{
+		perror("list_node_init");
+		return -1;
+	}
+	list_node_add(&list, a);
+	list_clear_func(&list, free);
 
 	return 0;
 }
