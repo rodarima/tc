@@ -1,5 +1,5 @@
-#ifndef STACK_LINKED_H
-#define STACK_LINKED_H
+#ifndef STACK_H
+#define STACK_H
 
 struct stack_node_t
 {
@@ -23,4 +23,4 @@ void stack_push(void **stack, struct stack_node_t *node);
 /* Remove the first element, if it's empty, return -1 */
 int stack_pop(void **stack, void **ptr);
 
-#endif /* STACK_LINKED_H */
+#endif /* STACK_H */
