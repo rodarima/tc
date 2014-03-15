@@ -64,19 +64,19 @@ int main(int argc, char *argv[])
 	}
 	/**************************************************************/
 
-	if(list_find(&list, "a", strcmp) != a)
+	if(list_find_node(&list, "a", (int (*)(void *, void *))strcmp) != a)
 	{
-		printf("list_find(&list, 'a', strcmp) != a\n");
+		printf("list_find_node(&list, 'a', strcmp) != a\n");
 		return -1;
 	}
-	if(list_find(&list, "aa", strcmp) != NULL)
+	if(list_find_node(&list, "aa", (int (*)(void *, void *))strcmp) != NULL)
 	{
-		printf("list_find(&list, 'aa', strcmp) != NULL\n");
+		printf("list_find_node(&list, 'aa', strcmp) != NULL\n");
 		return -1;
 	}
 
 
-	list_remove(&list, b);
+	list_remove_node(&list, b);
 	if(list.start != a)
 	{
 		printf("list.start != a\n");
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 		printf("list.end != c\n");
 		return -1;
 	}
-	list_remove(&list, c);
+	list_remove_node(&list, c);
 	if(list.start != a)
 	{
 		printf("list.start != a\n");
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 		printf("list.end != a\n");
 		return -1;
 	}
-	list_remove(&list, a);
+	list_remove_node(&list, a);
 	if(list.start != NULL)
 	{
 		printf("list.start != NULL\n");

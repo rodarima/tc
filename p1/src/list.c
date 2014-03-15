@@ -55,7 +55,21 @@ void list_map(struct list_t *list, void (*func)(void *))
 }
 
 /* Search a element in the list */
-struct list_node_t *list_find(struct list_t *list, void *ptr, int (*cmp)(void *, void *))
+void *list_find(struct list_t *list, void *ptr, int (*cmp)(void *, void *))
+{
+	struct list_node_t *node;
+	
+	node = list->start;
+	while(node)
+	{
+		if((cmp)(ptr, node->ptr) == 0) return node->ptr;
+		node = node->next;
+	}
+	return NULL;
+}
+
+/* Search a node in the list */
+struct list_node_t *list_find_node(struct list_t *list, void *ptr, int (*cmp)(void *, void *))
 {
 	struct list_node_t *node;
 	
@@ -118,7 +132,7 @@ int list_add(struct list_t *list, void *ptr)
 }
 
 /* Remove node from the list */
-void list_remove(struct list_t *list, struct list_node_t *node)
+void list_remove_node(struct list_t *list, struct list_node_t *node)
 {
 	if(node->prev)
 	{
@@ -140,3 +154,22 @@ void list_remove(struct list_t *list, struct list_node_t *node)
 	
 	list_node_free(node);
 }
+
+/* Remove a element from the list */
+int list_remove(struct list_t *list, void *ptr)
+{
+	struct list_node_t *node;
+	
+	node = list->start;
+	while(node)
+	{
+		if(node->ptr == ptr)
+		{
+			list_remove_node(list, node);
+			return 0;
+		}
+		node = node->next;
+	}
+	return -1;
+}
+
