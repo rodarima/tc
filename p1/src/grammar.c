@@ -60,24 +60,16 @@ int grammar_connector_new(struct grammar_t *g, struct connector_t **connector)
 	*connector = calloc(1, sizeof(*c));
 	return_if(!*connector, -1);
 
-	c->type = NODE_CON;
+	*connector->type = NODE_CON;
 
-	return_if(list_add(&(g->connectors), (void *) *connector), -1);
+	grammar_connector_add(g, *connector);
 
 	return 0;
 }
 
+/* FIXME: Only free a connector after disconnection */
 void grammar_connector_free(struct connector_t *connector)
 {
-	struct connector_t *tmp;
-
-	if(connector->from)
-	{
-		if((tmp = list_find(&(connector->from->to), connector)) != NULL)
-		{
-			list->remove(&(connector->from->to), tmp);
-		}
-	}
 	free(connector);
 }
 
@@ -86,35 +78,21 @@ int grammar_cmp_ptr(void *a, void *b)
 	return a==b;
 }
 
+int grammar_cmp_str_symbol(void *a, void *b)
+{
+	struct symbol_t *s;
+	s = (struct symbol_t *) b;
 
-
-
+	return strcmp((char *) a, b->name);
+}
 
 int grammar_connector_add(struct grammar_t *g, struct connector_t *c)
 {
-	struct connector_t **connectors;
-	long n;
-	size_t size;
-
-	n = g->connectors_n + 1;
-	size = n * sizeof(struct connector_t *);
-	
-	connectors = realloc(g->connectors, size);
-	
-	if(!connectors)
-	{
-		perror("realloc");
-		return -1;
-	}
-
-	connectors[n-1] = c;
-
-	g->connectors = connectors;
-	g->connectors_n = n;
-
+	return_if(list_add(&(g->connectors), (void *) c), -1);
 	return 0;
 }
 
+/* FIXME */
 void grammar_node_print(void *node)
 {
 	int type;
@@ -135,10 +113,6 @@ void grammar_node_print(void *node)
 			printf("ERROR, type not identified");
 			break;
 	}
-}
-char grammar_node_type(void *node)
-{
-	return *((char*) node);
 }
 
 void grammar_connector_print(struct connector_t *c)
@@ -163,145 +137,48 @@ void grammar_connector_print(struct connector_t *c)
 	}
 }
 
-
-
-static int grammar_variable_init(const char *name, struct symbol_t **symbol)
-{
-	return grammar_symbol_init(name, symbol, NODE_VAR);
-}
-
-void *grammar_variable_new(struct grammar_t *g, const char *name)
-{
-	struct symbol_t **variables;
-	struct symbol_t *symbol;
-	long n;
-	size_t size;
-	struct symbol_t *find;
-
-	/* If it's duplicated */
-	if(find = grammar_variable_find(g, name))
-		return find;
-
-	n = g->variables_n + 1;
-	size = n * sizeof(struct symbol_t *);
-	
-	variables = realloc(g->variables, size);
-	
-	if(!variables)
-	{
-		perror("realloc");
-		return NULL;
-	}
-	
-	if(grammar_variable_init(name, &symbol) < 0)
-		return NULL;
-
-	variables[n-1] = symbol;
-
-	g->variables = variables;
-	g->variables_n = n;
-
-	return symbol;
-}
-
-static void *grammar_variable_find(struct grammar_t *g, const char *name)
-{
-	int i;
-
-	for(i=0; i<g->variables_n; i++)
-	{
-		if(strcmp(g->variables[i]->name, name) == 0)
-		{
-			return g->variables[i];
-		}
-	}
-
-	return NULL;
-}
-
-
-
-static int grammar_terminal_init(const char *name, struct symbol_t **symbol)
-{
-	return grammar_symbol_init(name, symbol, NODE_TER);
-}
-
-void *grammar_terminal_new(struct grammar_t *g, const char *name)
-{
-	struct symbol_t **terminals;
-	struct symbol_t *symbol;
-	long n;
-	size_t size;
-	struct symbol_t *find;
-
-	/* If it's duplicated */
-	if(find = grammar_terminal_find(g, name))
-		return find;
-
-	n = g->terminals_n + 1;
-	size = n * sizeof(struct symbol_t *);
-	
-	terminals = realloc(g->terminals, size);
-	
-	if(!terminals)
-	{
-		perror("realloc");
-		return NULL;
-	}
-	
-	if(grammar_terminal_init(name, &symbol) < 0)
-		return NULL;
-
-	terminals[n-1] = symbol;
-
-	g->terminals = terminals;
-	g->terminals_n = n;
-
-	return symbol;
-}
-
-static void *grammar_terminal_find(struct grammar_t *g, const char *name)
-{
-	int i;
-
-	for(i=0; i<g->terminals_n; i++)
-	{
-		if(strcmp(g->terminals[i]->name, name) == 0)
-		{
-			return g->terminals[i];
-		}
-	}
-
-	return NULL;
-}
-
-
-
-static int grammar_symbol_init(const char *name, struct symbol_t **symbol, int type)
+int grammar_symbol_new(struct grammar_t *g, struct symbol_t **symbol, const char *name, char type)
 {
 	struct symbol_t *s;
+	struct list_t *list;
+	if(IS_NODE_TYPE(type, NODE_VAR))
+	{
+		list = &(g->variables);
+	}
+	else
+	{
+		list = &(g->terminals);
+	}
+	
+	s = list_find(list, name, grammar_cmp_str_symbol);
+	return_if(s, s);
+
+	return_if(grammar_symbol_init(symbol, name, type), -1);
+
+	if(list_add(list, *symbol) != 0)
+	{
+		grammar_symbol_free(symbol);
+		return -1;
+	}
+
+	return 0;
+}
+
+static int grammar_symbol_init(struct symbol_t **symbol, const char *name, int type)
+{
 	char *n;
 
-	s = (struct symbol_t *) malloc(sizeof(*s));
-	if(s == NULL)
+	n = malloc(strlen(name));
+	return_if(n == NULL, -1);
+	*symbol = calloc(1, sizeof(**symbol));
+	if(*symbol == NULL)
 	{
-		perror("malloc");
+		free(n);
 		return -1;
 	}
 
-	n = (char *) malloc(strlen(name) + 1);
-	if(n == NULL)
-	{
-		free(s);
-		perror("malloc");
-		return -1;
-	}
-
-	strcpy(n, name);
-	s->type = type;
-	s->name = n;
-
-	(*symbol) = s;
+	*symbol->type = type;
+	*symbol->name = strcpy(n, name);
 	return 0;
 }
 
@@ -455,6 +332,7 @@ int grammar_clean_no_generators(struct grammar_t *g)
 			grammar_symbol_print(sym);
 		}
 	}
+
 	printf("Unmarked variables are:\n");
 	for(i=0; i<g->variables_n; i++)
 	{

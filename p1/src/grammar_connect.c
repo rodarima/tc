@@ -5,15 +5,30 @@
 
 
 /*
+ * Connector example:
+ *
+ *   ? --> (C) --> ?
+ *          |
+ *          v
+ *         (?)
+ */
+
+/*
  * Connects from a symbol to connector.
  *
- *  SRC -=-> (C) -...->
- *            |
- *            .
- *            .
- *            .
+ * Before:
+ *
+ *   SRC     (C) --> ?
  *            |
  *            v
+ *           (?)
+ *
+ * After:
+ *
+ *   SRC --> (C) --> ?
+ *            |
+ *            v
+ *           (?)
  */
 int grammar_connect_from_symbol(struct connector_t *connector, struct symbol_t *src)
 {
@@ -28,13 +43,19 @@ int grammar_connect_from_symbol(struct connector_t *connector, struct symbol_t *
 /*
  * Connects from a connector to a connector.
  *
- * ...-> (SRC) -=-> (C) -...->
- *         |        |
- *         .        .
- *         .        .
- *         .        .
- *         |        |
- *         v        v
+ * Before:
+ *
+ *   (SRC)     (C) --> ?
+ *              |
+ *              v
+ *             (?)
+ *
+ * After:
+ *
+ *   (SRC) --> (C) --> ?
+ *              |
+ *              v
+ *             (?)
  *
  */
 void grammar_connect_from_connector(struct connector_t *connector, struct connector_t *src)
@@ -50,13 +71,19 @@ void grammar_connect_from_connector(struct connector_t *connector, struct connec
 /*
  * Connects from a connector to a symbol.
  *
- *  ...-> (C) -=-> DST
- *         |
- *         .
- *         .
- *         .
- *         |
- *         v
+ * Before:
+ *
+ *   ? --> (C)     DST
+ *          |
+ *          v
+ *         (?)
+ *
+ * After:
+ *
+ *   ? --> (C) --> DST
+ *          |
+ *          v
+ *         (?)
  *
  */
 int grammar_connect_to_symbol(struct connector_t *connector, struct symbol_t *dst)
@@ -72,13 +99,19 @@ int grammar_connect_to_symbol(struct connector_t *connector, struct symbol_t *ds
 /*
  * Connects from a connector to a connector.
  *
- *  ...-> (C) -=-> (SRC) -...->
- *         |         |
- *         .         .
- *         .         .
- *         .         .
- *         |         |
- *         v         v
+ * Before:
+ *
+ *   ? --> (C) --> ?
+ *          
+ *          
+ *        (DST)
+ *
+ * After:
+ *
+ *   ? --> (C) --> ?
+ *          |
+ *          v
+ *        (DST)
  *
  */
 void grammar_connect_to_connector(struct connector_t *connector, struct connector_t *dst)
@@ -91,24 +124,144 @@ void grammar_connect_to_connector(struct connector_t *connector, struct connecto
 	connector->con = dst;
 }
 
-
-int grammar_disconnect_from(struct connector_t *connector, struct symbol_t *ptr)
+/*
+ * Disconnects a connector from a symbol.
+ *
+ * Before:
+ *
+ *   SRC --> (C) --> ?
+ *            |
+ *            v
+ *           (?)
+ *
+ * After:
+ *
+ *   SRC     (C) --> ?
+ *            |
+ *            v
+ *           (?)
+ *
+ */
+int grammar_disconnect_from_symbol(struct connector_t *connector)
 {
-	struct connector_t *c;
-	struct symbol_t *s;
-
 #ifndef NDEBUG
 	if(connector->from == NULL) debug("connector->from == NULL");
 #endif
-	if(NODE_IS_TYPE(connector->from, NODE_CON))
-	{
-		c = (struct connector_t *)connector->from;
-		/* TODO: REMOVE RECURSIVELLY ALL CONNECTORS */
-		connector->from
-	}
-	return_if(list_add(&(src->to), (void *) connector), -1);
-	connector->from = src;
+	return_if(list_remove(&(connector->from->to), connector), -1);
+	connector->from = NULL;
 	return 0;
 }
-int grammar_disconnect_symbol(struct connector_t *connector, struct symbol_t *src)
-int grammar_disconnect_connector(struct connector_t *connector, struct symbol_t *src)
+
+/*
+ * Disconnects a connector from a connector.
+ *
+ * Before:
+ *
+ *   (SRC) --> (C) --> ?
+ *              |
+ *              v
+ *             (?)
+ *
+ * After:
+ *
+ *   (SRC)     (C) --> ?
+ *              |
+ *              v
+ *             (?)
+ *
+ */
+void grammar_disconnect_from_connector(struct connector_t *connector)
+{
+#ifndef NDEBUG
+	if(connector->from == NULL) debug("connector->from == NULL");
+#endif
+	connector->from->con = NULL;
+	connector->from = NULL;
+}
+
+/*
+ * Disconnects a connector from any.
+ *
+ * Before:
+ *
+ *   ??? --> (C) --> ?
+ *            |
+ *            v
+ *           (?)
+ *
+ * After:
+ *
+ *   ???     (C) --> ?
+ *            |
+ *            v
+ *           (?)
+ *
+ */
+int grammar_disconnect_from(struct connector_t *connector)
+{
+#ifndef NDEBUG
+	if(connector->from == NULL) debug("connector->from == NULL");
+#endif
+	if(IS_NODE_TYPE(connector->from, NODE_CON))
+	{
+		return grammar_disconnect_from_connector(connector);
+	}
+	else
+	{
+		return grammar_disconnect_from_symbol(connector);
+	}
+}
+
+/*
+ * Disconnects a connector to another connector.
+ *
+ * Before:
+ *
+ *   ? --> (C) --> ?
+ *          |
+ *          v
+ *        (DST)
+ *
+ * After:
+ *
+ *   ? --> (C) --> ?
+ *          
+ *          
+ *        (DST)
+ *
+ */
+void grammar_disconnect_to_connector(struct connector_t *connector)
+{
+#ifndef NDEBUG
+	if(connector->con == NULL) debug("connector->con == NULL");
+#endif
+	connector->con->from = NULL;
+	connector->con = NULL;
+}
+/*
+ * Disconnects a connector to a symbol.
+ *
+ * Before:
+ *
+ *   ? --> (C) --> DST
+ *          |
+ *          v
+ *         (?)
+ *
+ * After:
+ *
+ *   ? --> (C)     DST
+ *          |
+ *          v
+ *         (?)
+ *
+ */
+int grammar_disconnect_to_symbol(struct connector_t *connector)
+{
+#ifndef NDEBUG
+	if(connector->sym == NULL) debug("connector->sym == NULL");
+#endif
+	return_if(list_remove(&(connector->sym->from), connector), -1);
+	connector->sym = NULL;
+	return 0;
+}
