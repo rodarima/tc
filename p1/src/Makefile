@@ -1,10 +1,13 @@
 CC = gcc
-CFLAGS = -g
+CFLAGS = -g -Wall
 
+test: readl.o parse_std.o list.o grammar.o
 
-test: readl.o parse_std.o
+test2: readl.o parse_std.o list.o grammar.o
 
-test2: readl.o parse_std.o grammar.o
+grammar.o: list.o grammar_connect.o
+
+parse_std.o: grammar.o 
 
 test_stack: stack.o
 

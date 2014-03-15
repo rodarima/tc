@@ -147,7 +147,9 @@ int grammar_disconnect_from_symbol(struct connector_t *connector)
 #ifndef NDEBUG
 	if(connector->from == NULL) debug("connector->from == NULL");
 #endif
-	return_if(list_remove(&(connector->from->to), connector), -1);
+	struct symbol_t *from;
+	from = connector->from;
+	return_if(list_remove(&(from->to), connector), -1);
 	connector->from = NULL;
 	return 0;
 }
@@ -175,7 +177,9 @@ void grammar_disconnect_from_connector(struct connector_t *connector)
 #ifndef NDEBUG
 	if(connector->from == NULL) debug("connector->from == NULL");
 #endif
-	connector->from->con = NULL;
+	struct connector_t *from;
+	from = connector->from;
+	from->con = NULL;
 	connector->from = NULL;
 }
 
@@ -202,9 +206,10 @@ int grammar_disconnect_from(struct connector_t *connector)
 #ifndef NDEBUG
 	if(connector->from == NULL) debug("connector->from == NULL");
 #endif
-	if(IS_NODE_TYPE(connector->from, NODE_CON))
+	if(NODE_IS_TYPE(connector->from, NODE_CON))
 	{
-		return grammar_disconnect_from_connector(connector);
+		grammar_disconnect_from_connector(connector);
+		return 0;
 	}
 	else
 	{

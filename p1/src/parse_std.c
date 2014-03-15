@@ -6,6 +6,7 @@
 
 #include "constants.h"
 #include "grammar.h"
+#include "dbg.h"
 
 #define SYM_EQUAL	'='
 #define SYM_SEPAR	','
@@ -77,7 +78,7 @@ int is_std_rule_left(const char *src)
 int is_std_rule_right(const char *src)
 {
 	int i;
-	char c,d;
+	char c;
 	int state;
 
 	state = 0;
@@ -147,7 +148,7 @@ int is_std_rule_right(const char *src)
 	}
 
 	/* Or here? */
-	printf("Found '\0' at %d (not expected)\n", i);
+	printf("Found '\\0' at %d (not expected)\n", i);
 	return 0;
 }
 /*
@@ -200,7 +201,7 @@ int grammar_add_generator(const char *name, struct grammar_t *g)
 int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 {
 	int i, t=0;
-	char c,d;
+	char c;
 	int state;
 	char tmp[MAX_LINE_SIZE];
 	/* TODO: Change this pointers to static memory, adding at the end */
@@ -253,8 +254,8 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				//printf("New variable (rule) called'%s'\n", tmp);
 
 				/* Terminate variable creation */
-				sym = grammar_variable_new(grammar, tmp);
-				grammar_connector_init(&conn);
+				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
+				return_if(grammar_connector_new(grammar, &conn), -1);
 				conn->from = sym;
 
 				state = 2;
@@ -282,7 +283,6 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
-				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha or '%c')\n",
 					c, c, i, SYM_QUOTE);
 				return -12;
@@ -297,7 +297,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				//printf("New terminal called '%s'\n", tmp);
 
 				/* Add new terminal */
-				sym = grammar_terminal_new(grammar, tmp);
+				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_TER), -1);
 				conn->sym = sym;
 
 				state = 4;
@@ -309,9 +309,8 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(c == SYM_NULL)
 			{
-				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c', '%c' or the end)\n",
-					c, c, i, SYM_QUOTE, SYM_SPECIAL, SYM_NULL);
+					c, c, i, SYM_QUOTE, SYM_SPECIAL);
 				return -13;
 			}
 			else
@@ -326,10 +325,9 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			{
 				/* Concatenate more symbols or terminals */
 
-				grammar_connector_init(&conn2);
+				return_if(grammar_connector_new(grammar, &conn2), -1);
 				conn->con = conn2;
 				conn2->from = conn;
-				grammar_connector_add(grammar, conn);
 				conn = conn2;
 				conn2 = NULL;
 
@@ -337,8 +335,6 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(c == SYM_NULL)
 			{
-				/* Add connector */
-				grammar_connector_add(grammar, conn);
 
 				/* ---------- READY --------- */
 				//printf("READY FOR ROCK!\n");
@@ -347,7 +343,6 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
-				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or the end)\n",
 					c, c, i, SYM_SEPAR);
 				return -14;
@@ -364,7 +359,6 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
-				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or '%c')\n",
 					c, c, i, SYM_SEPAR, SYM_QUOTE);
 				return -15;
@@ -384,14 +378,13 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				//printf("New variable called '%s'\n", tmp);
 
 				/* Add new variable */
-				sym = grammar_variable_new(grammar, tmp);
+				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
 				conn->sym = sym;
 
 				/* Concatenate more symbols or terminals */
-				grammar_connector_init(&conn2);
+				return_if(grammar_connector_new(grammar, &conn2), -1);
 				conn->con = conn2;
 				conn2->from = conn;
-				grammar_connector_add(grammar, conn);
 				conn = conn2;
 				conn2 = NULL;
 
@@ -404,11 +397,8 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				//printf("Last variable called '%s'\n", tmp);
 
 				/* Add new variable */
-				sym = grammar_variable_new(grammar, tmp);
+				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
 				conn->sym = sym;
-
-				/* Add connector */
-				grammar_connector_add(grammar, conn);
 
 				/* ---------- READY --------- */
 				//printf("READY FOR ROCK!\n");
@@ -417,7 +407,6 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
-				grammar_connector_free(conn);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha, '%c' or the end)\n",
 					c, c, i, SYM_SEPAR);
 				return -16;
@@ -432,6 +421,6 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 	}
 
 	/* Or here? */
-	printf("Found '\0' at %d (not expected)\n", i);
+	printf("Found '\\0' at %d (not expected)\n", i);
 	return -21;
 }

@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "readl.h"
 #include "parse_std.h"
 #define BUF_MAX	1024
@@ -80,9 +82,8 @@ int parse_file(int fd)
 
 int main(int argc, char *argv[])
 {
-	int fd,i;
+	int fd;
 	char *path;
-	ssize_t nc;
 	
 	if(argc != 2)
 	{

@@ -47,16 +47,14 @@ int parse_file(int fd, struct grammar_t *g)
 	while(nc > 0);
 
 	grammar_print(g);
-	grammar_clean_no_generators(g);
+	//grammar_clean_no_generators(g);
 
 	return 0;
 }
 
 int main(int argc, char *argv[])
 {
-	int fd,i;
-	char *path;
-	ssize_t nc;
+	int fd;
 	struct grammar_t *g;
 	
 	if(argc == 2)
@@ -80,7 +78,8 @@ int main(int argc, char *argv[])
 
 	if(parse_file(fd, g) < 0)
 	{
-		perror("parse");
+		printf("parse error\n");
+		grammar_free(g);
 		return -1;
 	}
 

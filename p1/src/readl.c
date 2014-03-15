@@ -19,12 +19,11 @@
 ssize_t readl(int fd, void *buffer, size_t nbyte)
 {
 	ssize_t read_status;
-	size_t i, w;
+	size_t i;
 	char ch;
 	char *buf;
 
 	buf = buffer;
-	w = 0;
 
 	for(i=0; i<nbyte; i++)
 	{
@@ -49,7 +48,7 @@ ssize_t readl(int fd, void *buffer, size_t nbyte)
 		}
 
 		/* read_status >= 0 */
-		if(ch == '\n' | ch == '\0')
+		if((ch == '\n') | (ch == '\0'))
 		{
 			/* Si llego al final de lo que debo leer, salgo */
 			buf[i] = '\0';

@@ -30,10 +30,10 @@ void list_clear(struct list_t *list);
 void list_clear_func(struct list_t *list, void (*func)(void *));
 
 /* Search a element in the list */
-void *list_find(struct list_t *list, void *ptr, int (*cmp)(void *, void *));
+void *list_find(struct list_t *list, const void *ptr, int (*cmp)(const void *, const void *));
 
 /* Search a node in the list */
-struct list_node_t *list_find_node(struct list_t *list, void *ptr, int (*cmp)(void *, void *));
+struct list_node_t *list_find_node(struct list_t *list, const void *ptr, int (*cmp)(const void *, const void *));
 
 /* Apply func to all elements in the list */
 void list_map(struct list_t *list, void (*func)(void *));
