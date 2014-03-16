@@ -258,6 +258,10 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
 				return_if(grammar_connector_new(grammar, &conn), -1);
 				return_if(grammar_connect_from_symbol(conn, sym), -1)
+				if(grammar->start == NULL)
+				{
+					grammar->start = sym;
+				}
 
 				state = 2;
 				t = 0;
