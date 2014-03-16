@@ -4,6 +4,7 @@
 #include "readl.h"
 #include "parse_std.h"
 #include "grammar.h"
+#include "grammar_graphviz.h"
 
 #define BUF_MAX	1024
 
@@ -48,6 +49,7 @@ int parse_file(int fd, struct grammar_t *g)
 
 	grammar_print(g);
 	//grammar_clean_no_generators(g);
+	grammar_graphviz_print(g);
 
 	return 0;
 }

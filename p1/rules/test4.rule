@@ -1,4 +1,4 @@
-S="a",B
+S="a",A,B
 A="b","c",C,C,C
 A="d",A
 B="e"
