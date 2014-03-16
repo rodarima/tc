@@ -6,6 +6,7 @@
 
 #include "constants.h"
 #include "grammar.h"
+#include "grammar_connect.h"
 #include "dbg.h"
 
 #define SYM_EQUAL	'='
@@ -256,7 +257,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				/* Terminate variable creation */
 				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
 				return_if(grammar_connector_new(grammar, &conn), -1);
-				conn->from = sym;
+				return_if(grammar_connect_from_symbol(conn, sym), -1)
 
 				state = 2;
 				t = 0;
@@ -298,7 +299,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 
 				/* Add new terminal */
 				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_TER), -1);
-				conn->sym = sym;
+				return_if(grammar_connect_to_symbol(conn, sym), -1)
 
 				state = 4;
 				t = 0;
@@ -326,8 +327,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 				/* Concatenate more symbols or terminals */
 
 				return_if(grammar_connector_new(grammar, &conn2), -1);
-				conn->con = conn2;
-				conn2->from = conn;
+				grammar_connect_to_connector(conn, conn2);
 				conn = conn2;
 				conn2 = NULL;
 
@@ -379,12 +379,11 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 
 				/* Add new variable */
 				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
-				conn->sym = sym;
+				return_if(grammar_connect_to_symbol(conn, sym), -1);
 
 				/* Concatenate more symbols or terminals */
 				return_if(grammar_connector_new(grammar, &conn2), -1);
-				conn->con = conn2;
-				conn2->from = conn;
+				grammar_connect_to_connector(conn, conn2);
 				conn = conn2;
 				conn2 = NULL;
 
@@ -398,7 +397,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 
 				/* Add new variable */
 				return_if(grammar_symbol_new(grammar, &sym, tmp, NODE_VAR), -1);
-				conn->sym = sym;
+				return_if(grammar_connect_to_symbol(conn, sym), -1);
 
 				/* ---------- READY --------- */
 				//printf("READY FOR ROCK!\n");

@@ -200,11 +200,17 @@ void grammar_symbol_print(struct symbol_t *s)
 {
 	if(NODE_IS_TYPE(s, NODE_VAR))
 	{
-		printf("Variable [%p]: %s\n", s, s->name);
+		printf("Variable [%p]: %s\nTO:\n", s, s->name);
+		list_map(&(s->to), (void (*)(void *)) grammar_connector_print);
+		printf("FROM:\n");
+		list_map(&(s->from), (void (*)(void *)) grammar_connector_print);
 	}
 	else if(NODE_IS_TYPE(s, NODE_TER))
 	{
-		printf("Terminal [%p]: %s\n", s, s->name);
+		printf("Terminal [%p]: %s\nTO:\n", s, s->name);
+		list_map(&(s->to), (void (*)(void *)) grammar_connector_print);
+		printf("FROM:\n");
+		list_map(&(s->from), (void (*)(void *)) grammar_connector_print);
 	}
 	else
 	{
