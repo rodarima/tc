@@ -5,15 +5,17 @@
 #define NODE_CON	1
 #define NODE_TER	2
 
-#define MARK_PASS	1<<7
+#define MARK_QUEUED	1<<7
 #define MARK_GEN	1<<6
 
-/* TYPE PGXX XXTT */
+/* TYPE QGXX XXTT */
 
 #define NODE_MARK(node,mark) do{ *((char *)(node)) = *((char *)(node)) | (mark); } while(0);
 #define NODE_IS_MARKED(node,mark) (*((char *)(node))&(mark))
+#define IS_NODE_MARKED(node,mark) (*((char *)(node))&(mark))
 #define NODE_TYPE(node) (*((char *)(node)))
 #define NODE_IS_TYPE(node, type) ((NODE_TYPE(node) & 0x03)==(type))
+#define IS_NODE_TYPE(node, type) ((NODE_TYPE(node) & 0x03)==(type))
 
 #include "list.h"
 
