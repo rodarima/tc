@@ -3,7 +3,7 @@ CFLAGS = -g -Wall
 
 test: readl.o parse_std.o list.o grammar.o
 
-test2: readl.o grammar_graphviz.o grammar_connect.o parse_std.o list.o grammar.o
+test2: readl.o queue.o grammar_reduce.o grammar_graphviz.o grammar_connect.o parse_std.o list.o grammar.o
 
 grammar.o: list.o grammar_connect.o
 
