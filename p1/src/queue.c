@@ -11,6 +11,21 @@ void queue_empty(struct queue_t *queue)
 	queue->end = NULL;
 }
 
+/* Delete all elements in a queue */
+void queue_clear(struct queue_t *queue)
+{
+	struct queue_node_t *node, *node2;
+	
+	node = queue->start;
+	while(node)
+	{
+		node2 = node->next;
+		queue_node_free(node);
+		node = node2;
+	}
+	queue_empty(queue);
+}
+
 /* Delete all elements in a queue, and apply func before */
 void queue_clear_func(struct queue_t *queue, void (*func)(void *))
 {
@@ -33,6 +48,7 @@ int queue_node_init(struct queue_node_t **node_addr, void *ptr)
 	*node_addr = calloc(1, sizeof(struct queue_node_t));
 	return_if(!*node_addr, -1);
 
+	debug("New node %p with ptr=%p", *node_addr, ptr);
 	(*node_addr)->ptr = ptr;
 	return 0;
 }
@@ -40,6 +56,7 @@ int queue_node_init(struct queue_node_t **node_addr, void *ptr)
 /* Free a node, NOT the contents */
 void queue_node_free(struct queue_node_t *node)
 {
+	debug("freeing %p", node);
 	free(node);
 }
 
@@ -80,6 +97,7 @@ int queue_pop(struct queue_t *queue, void **ptr)
 
 	*ptr = node->ptr;
 	queue->start = node->next;
+	if(!queue->start) queue->end = NULL;
 
 	queue_node_free(node);
 	return 0;
