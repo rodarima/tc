@@ -8,6 +8,8 @@
 #include "list.h"
 #include "dbg.h"
 
+#define NDEBUG
+
 int grammar_cmp_ptr(void *a, void *b);
 int grammar_cmp_str_symbol(const void *a, const void *b);
 static int grammar_symbol_init(struct symbol_t **symbol, const char *name, int type);
@@ -33,6 +35,7 @@ void grammar_free(struct grammar_t *g)
 
 void grammar_print(struct grammar_t *g)
 {
+	printf("---- BEGIN GRAMMAR ----\n");
 #ifndef NDEBUG
 	debug("Printing grammar");
 	debug("CONNECTORS:");
@@ -46,6 +49,7 @@ void grammar_print(struct grammar_t *g)
 	debug("TERMINALS:");
 #endif
 	list_map(&(g->terminals), (void (*)(void *)) grammar_symbol_print);
+	printf("---- END GRAMMAR ----\n");
 }
 
 int grammar_connector_new(struct grammar_t *g, struct connector_t **connector)
@@ -200,17 +204,17 @@ void grammar_symbol_print(struct symbol_t *s)
 {
 	if(NODE_IS_TYPE(s, NODE_VAR))
 	{
-		printf("Variable [%p]: %s\nTO:\n", s, s->name);
-		list_map(&(s->to), (void (*)(void *)) grammar_connector_print);
-		printf("FROM:\n");
-		list_map(&(s->from), (void (*)(void *)) grammar_connector_print);
+		printf("Variable [%p]: %s\n", s, s->name);
+		//list_map(&(s->to), (void (*)(void *)) grammar_connector_print);
+		//printf("FROM:\n");
+		//list_map(&(s->from), (void (*)(void *)) grammar_connector_print);
 	}
 	else if(NODE_IS_TYPE(s, NODE_TER))
 	{
-		printf("Terminal [%p]: %s\nTO:\n", s, s->name);
-		list_map(&(s->to), (void (*)(void *)) grammar_connector_print);
-		printf("FROM:\n");
-		list_map(&(s->from), (void (*)(void *)) grammar_connector_print);
+		printf("Terminal [%p]: %s\n", s, s->name);
+		//list_map(&(s->to), (void (*)(void *)) grammar_connector_print);
+		//printf("FROM:\n");
+		//list_map(&(s->from), (void (*)(void *)) grammar_connector_print);
 	}
 	else
 	{
@@ -389,3 +393,5 @@ int main(int argc, char *argv[])
 	return 0;
 }
 */
+
+#undef NDEBUG
