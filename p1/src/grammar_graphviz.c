@@ -42,6 +42,8 @@ void grammar_graphviz_connector_print(struct connector_t *c)
 
 void grammar_graphviz_print(struct grammar_t *g)
 {
+	printf("---- BEGIN GRAPHVIZ ----\n");
 	list_map(&(g->connectors), (void (*)(void *)) grammar_graphviz_connector_print);
+	printf("---- END GRAPHVIZ ----\n");
 }
 
