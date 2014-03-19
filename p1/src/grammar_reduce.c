@@ -25,6 +25,7 @@ int grammar_reduce_no_generators(struct grammar_t *g)
 	void *last, *element, *from;
 	struct symbol_t *symbol;
 	struct connector_t *connector;
+	long iteration = 0;
 
 	queue_empty(&gen);
 	
@@ -50,6 +51,7 @@ int grammar_reduce_no_generators(struct grammar_t *g)
 	/* For each terminal, find all generators */
 	do
 	{
+		debug("---- Iteration %ld ----", iteration);
 		if(queue_pop(&gen, &element))
 		{
 			debug("ERROR FATAL");
@@ -101,6 +103,13 @@ int grammar_reduce_no_generators(struct grammar_t *g)
 						}
 					}
 				}
+				else
+				{
+					if(gen.end)
+					{
+						last = gen.end->ptr;
+					}
+				}
 			}
 			else if(last == element)
 			{
@@ -150,6 +159,7 @@ int grammar_reduce_no_generators(struct grammar_t *g)
 				list_node = list_node->next;
 			}
 		}
+		iteration++;
 	}
 	while(gen.start);
 
