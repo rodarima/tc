@@ -292,7 +292,6 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 		}
 		node = node2;
 	}
-
 	printf("Removed %ld elements no-generators\n", deleted);
 
 	return 0;
