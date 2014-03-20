@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include "readl.h"
 #include "parse_std.h"
@@ -27,6 +28,7 @@ int parse_file(int fd, struct grammar_t *g)
 {
 	char buffer[BUF_MAX];
 	ssize_t nc;
+	long rules = 0;
 
 	do
 	{
@@ -45,8 +47,10 @@ int parse_file(int fd, struct grammar_t *g)
 			printf("Bad rule\n");
 			return -1;
 		}
+		rules++;
 	}
 	while(nc > 0);
+	printf("%ld rules loaded\n", rules);
 
 	//grammar_print(g);
 	//grammar_graphviz_print(g);
@@ -65,10 +69,18 @@ int parse_file(int fd, struct grammar_t *g)
 	return 0;
 }
 
+double u_sec()
+{
+	struct timeval t;
+	if (gettimeofday(&t, 0) < 0 ) return 0.0;
+	return (t.tv_usec + t.tv_sec * 1000000.0);
+}
+
 int main(int argc, char *argv[])
 {
 	int fd;
 	struct grammar_t *g;
+	double t;
 	
 	if(argc == 2)
 	{
@@ -89,12 +101,15 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	t =  u_sec();
 	if(parse_file(fd, g) < 0)
 	{
 		printf("parse error\n");
 		grammar_free(g);
 		return -1;
 	}
+	t = u_sec() - t;
+	printf("Total %f usec\n", t);
 
 	grammar_free(g);
 
