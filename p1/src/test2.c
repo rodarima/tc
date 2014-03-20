@@ -38,7 +38,7 @@ int parse_file(int fd, struct grammar_t *g)
 		}
 		else if(nc == 0) break;
 
-		printf("Adding rule %s\n", buffer);
+		//printf("Adding rule %s\n", buffer);
 		
 		if(parse_std_add_rule(buffer, g) < 0)
 		{
@@ -49,13 +49,13 @@ int parse_file(int fd, struct grammar_t *g)
 	while(nc > 0);
 
 	//grammar_print(g);
-	grammar_graphviz_print(g);
+	//grammar_graphviz_print(g);
 	if(grammar_reduce_no_generators(g))
 	{
 		printf("Fallo reduce\n");
 	}
-	grammar_print(g);
-	grammar_graphviz_print(g);
+	//grammar_print(g);
+	//grammar_graphviz_print(g);
 	//grammar_print(g);
 
 	return 0;

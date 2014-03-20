@@ -1,3 +1,5 @@
+#define NDEBUG
+
 #include "grammar_reduce.h"
 #include "grammar.h"
 #include "grammar_connect.h"
@@ -166,6 +168,7 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 
 	queue_clear(&gen);
 	
+#if 0
 	printf("Marked variables are:\n");
 	list_node = g->variables.start;
 	while(list_node)
@@ -188,7 +191,7 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 		}
 		list_node = list_node->next;
 	}
-
+#endif
 
 	return 0;
 }
@@ -200,6 +203,7 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 	struct list_node_t *node, *node2;
 	struct queue_t orph;
 	void *element;
+	long deleted = 0;
 
 	queue_empty(&orph);
 
@@ -221,6 +225,7 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 			return_if(grammar_disconnect_all(connector), -1);
 			grammar_connector_free(connector);
 			list_remove_node(&(g->connectors), node);
+			deleted++;
 		}
 		node = node2;
 	}
@@ -235,15 +240,22 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 			{
 				//FIXME: return & mem
 				debug("FATAL, connector %p have no-generator connector->con connection", connector);
+				queue_clear(&orph);
 				return -1;
 			}
+
 			debug("Pushing connector->con %p", connector->con);
-			queue_push(&orph, connector->con);
+			if(queue_push(&orph, connector->con))
+			{
+				queue_clear(&orph);
+				return -1;
+			}
 		}
 		return_if(grammar_disconnect_all(connector), -1);
 		grammar_connector_free(connector);
 		//TODO: Try to reduce this O(n) deletion
 		list_remove(&(g->connectors), connector);
+		deleted++;
 	}
 
 	node = g->variables.start;
@@ -265,16 +277,50 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 			}
 			grammar_symbol_free(symbol);
 			list_remove_node(&(g->variables), node);
+			deleted++;
 		}
 		node = node2;
 	}
+	printf("Removed %ld elements no-generators\n", deleted);
 
 	return 0;
+}
+
+void grammar_reduce_no_generators_unmark(struct grammar_t *g)
+{
+	struct list_node_t *node;
+	struct symbol_t *symbol;
+	struct connector_t *connector;
+
+	node = g->connectors.start;
+	while(node)
+	{
+		connector = (struct connector_t *) node->ptr;
+		NODE_UNMARK(connector);
+		node = node->next;
+	}
+	node = g->variables.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		NODE_UNMARK(symbol);
+		node = node->next;
+	}
+	node = g->terminals.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		NODE_UNMARK(symbol);
+		node = node->next;
+	}
 }
 
 int grammar_reduce_no_generators(struct grammar_t *g)
 {
 	return_if(grammar_reduce_no_generators_mark(g), -1);
 	return_if(grammar_reduce_no_generators_remove(g), -1);
+	grammar_reduce_no_generators_unmark(g);
 	return 0;
 }
+
+#undef NDEBUG
