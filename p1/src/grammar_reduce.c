@@ -1,3 +1,5 @@
+#define NDEBUG
+
 #include "grammar_reduce.h"
 #include "grammar.h"
 #include "grammar_connect.h"
@@ -166,6 +168,7 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 
 	queue_clear(&gen);
 	
+#if 0
 	printf("Marked variables are:\n");
 	list_node = g->variables.start;
 	while(list_node)
@@ -188,7 +191,7 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 		}
 		list_node = list_node->next;
 	}
-
+#endif
 
 	return 0;
 }
@@ -200,6 +203,13 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 	struct list_node_t *node, *node2;
 	struct queue_t orph;
 	void *element;
+	long deleted = 0;
+	
+	if(!NODE_IS_MARKED(g->start, MARK_GEN))
+	{
+		debug("Removing no-generator start symbol");
+		g->start = NULL;
+	}
 
 	queue_empty(&orph);
 
@@ -221,6 +231,7 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 			return_if(grammar_disconnect_all(connector), -1);
 			grammar_connector_free(connector);
 			list_remove_node(&(g->connectors), node);
+			deleted++;
 		}
 		node = node2;
 	}
@@ -235,15 +246,22 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 			{
 				//FIXME: return & mem
 				debug("FATAL, connector %p have no-generator connector->con connection", connector);
+				queue_clear(&orph);
 				return -1;
 			}
+
 			debug("Pushing connector->con %p", connector->con);
-			queue_push(&orph, connector->con);
+			if(queue_push(&orph, connector->con))
+			{
+				queue_clear(&orph);
+				return -1;
+			}
 		}
 		return_if(grammar_disconnect_all(connector), -1);
 		grammar_connector_free(connector);
 		//TODO: Try to reduce this O(n) deletion
 		list_remove(&(g->connectors), connector);
+		deleted++;
 	}
 
 	node = g->variables.start;
@@ -263,18 +281,287 @@ int grammar_reduce_no_generators_remove(struct grammar_t *g)
 				debug("FATAL, symbol %s have from connections", symbol->name);
 				return -1;
 			}
+			if(symbol == g->start)
+			{
+				debug("FATAL: Start symbol being removed");
+				return -1;
+			}
 			grammar_symbol_free(symbol);
 			list_remove_node(&(g->variables), node);
+			deleted++;
 		}
 		node = node2;
 	}
 
+	printf("Removed %ld elements no-generators\n", deleted);
+
 	return 0;
+}
+
+void grammar_reduce_unmark(struct grammar_t *g)
+{
+	struct list_node_t *node;
+	struct symbol_t *symbol;
+	struct connector_t *connector;
+
+	node = g->connectors.start;
+	while(node)
+	{
+		connector = (struct connector_t *) node->ptr;
+		NODE_UNMARK(connector);
+		node = node->next;
+	}
+	node = g->variables.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		NODE_UNMARK(symbol);
+		node = node->next;
+	}
+	node = g->terminals.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		NODE_UNMARK(symbol);
+		node = node->next;
+	}
 }
 
 int grammar_reduce_no_generators(struct grammar_t *g)
 {
 	return_if(grammar_reduce_no_generators_mark(g), -1);
 	return_if(grammar_reduce_no_generators_remove(g), -1);
+	grammar_reduce_unmark(g);
 	return 0;
 }
+
+
+int grammar_reduce_unreachables_mark(struct grammar_t *g)
+{
+	struct queue_t reach;
+	void *element;
+	struct connector_t *connector;
+	struct symbol_t *symbol;
+	struct list_node_t *node;
+	long iteration = 0;
+
+	queue_empty(&reach);
+
+	if(!g->start)
+	{
+		printf("Fatal: There is not valid start symbol\n");
+		return -1;
+	}
+
+	/* Add first symbol */
+	return_if(queue_push(&reach, g->start), -1);
+	NODE_MARK(g->start, MARK_REACH);
+
+	while(!queue_pop(&reach, &element))
+	{
+		debug("---- Iteration %ld ----", iteration);
+		if(NODE_IS_TYPE(element, NODE_CON))
+		{
+			connector = (struct connector_t *) element;
+			NODE_MARK(connector, MARK_REACH);
+			if(connector->con && (!NODE_IS_MARKED(connector->con, MARK_REACH)))
+			{
+				if(queue_push(&reach, connector->con))
+				{
+					queue_clear(&reach);
+					return -1;
+				}
+				NODE_MARK(connector->con, MARK_REACH);
+			}
+			if(NODE_IS_TYPE(connector->sym, NODE_VAR))
+			{
+				if(!NODE_IS_MARKED(connector->sym, MARK_REACH))
+				{
+					if(queue_push(&reach, connector->sym))
+					{
+						queue_clear(&reach);
+						return -1;
+					}
+				}
+			}
+			NODE_MARK(connector->sym, MARK_REACH);
+		}
+		else
+		{
+			if(NODE_IS_TYPE(element, NODE_TER))
+			{
+				debug("This cannot happend.");
+				return -1;
+			}
+			symbol = (struct symbol_t *) element;
+
+			node = symbol->to.start;
+			while(node)
+			{
+				element = node->ptr;
+
+				if(!NODE_IS_MARKED(element, MARK_REACH))
+				{
+					if(queue_push(&reach, element))
+					{
+						queue_clear(&reach);
+						return -1;
+					}
+					NODE_MARK(element, MARK_REACH);
+				}
+				
+				node = node->next;
+			}
+		}
+		iteration++;
+	}
+	
+#if 0
+	printf("Marked variables are:\n");
+	node = g->variables.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		if(NODE_IS_MARKED(symbol, MARK_REACH))
+		{
+			grammar_symbol_print(symbol);
+		}
+		node = node->next;
+	}
+	printf("Marked terminals are:\n");
+	node = g->terminals.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		if(NODE_IS_MARKED(symbol, MARK_REACH))
+		{
+			grammar_symbol_print(symbol);
+		}
+		node = node->next;
+	}
+	printf("Unmarked variables are:\n");
+	node = g->variables.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		if(!NODE_IS_MARKED(symbol, MARK_REACH))
+		{
+			grammar_symbol_print(symbol);
+		}
+		node = node->next;
+	}
+	printf("Unmarked terminals are:\n");
+	node = g->terminals.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		if(!NODE_IS_MARKED(symbol, MARK_REACH))
+		{
+			grammar_symbol_print(symbol);
+		}
+		node = node->next;
+	}
+#endif
+
+	return 0;
+}
+
+int grammar_reduce_unreachables_remove(struct grammar_t *g)
+{
+	struct connector_t *connector;
+	struct symbol_t *symbol;
+	struct list_node_t *node, *node2;
+	long deleted = 0;
+	
+	if(!NODE_IS_MARKED(g->start, MARK_REACH))
+	{
+		debug("Removing unreachable start symbol");
+		g->start = NULL;
+	}
+
+	/* TODO: Use only var->to and var->from from unreachables */
+	node = g->connectors.start;
+	while(node)
+	{
+		node2 = node->next;
+		connector = (struct connector_t *) node->ptr;
+		if(!NODE_IS_MARKED(connector, MARK_REACH))
+		{
+			return_if(grammar_disconnect_all(connector), -1);
+			grammar_connector_free(connector);
+			list_remove_node(&(g->connectors), node);
+			deleted++;
+		}
+		node = node2;
+	}
+	node = g->variables.start;
+	while(node)
+	{
+		node2 = node->next;
+		symbol = (struct symbol_t *) node->ptr;
+		if(!NODE_IS_MARKED(symbol, MARK_REACH))
+		{
+			if(symbol->to.start)
+			{
+				debug("FATAL, symbol %s have to connections", symbol->name);
+				return -1;
+			}
+			if(symbol->from.start)
+			{
+				debug("FATAL, symbol %s have from connections", symbol->name);
+				return -1;
+			}
+			if(symbol == g->start)
+			{
+				debug("FATAL: Start symbol being removed");
+				return -1;
+			}
+			grammar_symbol_free(symbol);
+			list_remove_node(&(g->variables), node);
+			deleted++;
+		}
+		node = node2;
+	}
+	node = g->terminals.start;
+	while(node)
+	{
+		node2 = node->next;
+		symbol = (struct symbol_t *) node->ptr;
+		if(!NODE_IS_MARKED(symbol, MARK_REACH))
+		{
+			if(symbol->to.start)
+			{
+				debug("FATAL, symbol %s have to connections", symbol->name);
+				return -1;
+			}
+			if(symbol->from.start)
+			{
+				debug("FATAL, symbol %s have from connections", symbol->name);
+				return -1;
+			}
+			if(symbol == g->start)
+			{
+				debug("FATAL: Start symbol being removed");
+				return -1;
+			}
+			grammar_symbol_free(symbol);
+			list_remove_node(&(g->terminals), node);
+			deleted++;
+		}
+		node = node2;
+	}
+
+	printf("Removed %ld unreachable elements\n", deleted);
+
+	return 0;
+}
+
+int grammar_reduce_unreachables(struct grammar_t *g)
+{
+	return_if(grammar_reduce_unreachables_mark(g), -1);
+	return_if(grammar_reduce_unreachables_remove(g), -1);
+	grammar_reduce_unmark(g);
+	return 0;
+}
+
+#undef NDEBUG

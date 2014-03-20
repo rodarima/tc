@@ -7,10 +7,13 @@
 
 #define MARK_QUEUED	1<<7
 #define MARK_GEN	1<<6
+#define MARK_REACH	1<<5
+#define MARK_ALL	~0x03
 
 /* TYPE QGXX XXTT */
 
 #define NODE_MARK(node,mark) do{ *((char *)(node)) = *((char *)(node)) | (mark); } while(0);
+#define NODE_UNMARK(node) do{ *((char *)(node)) = *((char *)(node)) & (0x03); } while(0);
 #define NODE_IS_MARKED(node,mark) (*((char *)(node))&(mark))
 #define IS_NODE_MARKED(node,mark) (*((char *)(node))&(mark))
 #define NODE_TYPE(node) (*((char *)(node)))

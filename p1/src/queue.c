@@ -1,3 +1,5 @@
+#define NDEBUG
+
 #include "queue.h"
 
 #include <stdlib.h>
@@ -103,3 +105,4 @@ int queue_pop(struct queue_t *queue, void **ptr)
 	return 0;
 }
 
+#undef NDEBUG
