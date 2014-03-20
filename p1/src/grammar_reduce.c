@@ -1,5 +1,6 @@
 #include "grammar_reduce.h"
 #include "grammar.h"
+#include "grammar_connect.h"
 #include "queue.h"
 #include "list.h"
 #include "dbg.h"
@@ -18,7 +19,7 @@ int is_connector_complete(struct connector_t *connector)
 }
 
 /* TODO: Review this code */
-int grammar_reduce_no_generators(struct grammar_t *g)
+int grammar_reduce_no_generators_mark(struct grammar_t *g)
 {
 	struct queue_t gen;
 	struct list_node_t *list_node;
@@ -189,5 +190,91 @@ int grammar_reduce_no_generators(struct grammar_t *g)
 	}
 
 
+	return 0;
+}
+
+int grammar_reduce_no_generators_remove(struct grammar_t *g)
+{
+	struct connector_t *connector;
+	struct symbol_t *symbol;
+	struct list_node_t *node, *node2;
+	struct queue_t orph;
+	void *element;
+
+	queue_empty(&orph);
+
+	node = g->connectors.start;
+	while(node)
+	{
+		node2 = node->next;
+		connector = (struct connector_t *) node->ptr;
+		if(!NODE_IS_MARKED(connector, MARK_GEN))
+		{
+			//FIXME: return OK?
+			if(connector->con)
+			{
+				if(NODE_IS_MARKED(connector->con, MARK_GEN))
+				{
+					queue_push(&orph, connector->con);
+				}
+			}
+			return_if(grammar_disconnect_all(connector), -1);
+			grammar_connector_free(connector);
+			list_remove_node(&(g->connectors), node);
+		}
+		node = node2;
+	}
+
+	while(!queue_pop(&orph, &element))
+	{
+		debug("Popped %p", element);
+		connector = (struct connector_t *) element;
+		if(connector->con)
+		{
+			if(!NODE_IS_MARKED(connector->con, MARK_GEN))
+			{
+				//FIXME: return & mem
+				debug("FATAL, connector %p have no-generator connector->con connection", connector);
+				return -1;
+			}
+			debug("Pushing connector->con %p", connector->con);
+			queue_push(&orph, connector->con);
+		}
+		return_if(grammar_disconnect_all(connector), -1);
+		grammar_connector_free(connector);
+		//TODO: Try to reduce this O(n) deletion
+		list_remove(&(g->connectors), connector);
+	}
+
+	node = g->variables.start;
+	while(node)
+	{
+		node2 = node->next;
+		symbol = (struct symbol_t *) node->ptr;
+		if(!NODE_IS_MARKED(symbol, MARK_GEN))
+		{
+			if(symbol->to.start)
+			{
+				debug("FATAL, symbol %s have to connections", symbol->name);
+				return -1;
+			}
+			if(symbol->from.start)
+			{
+				debug("FATAL, symbol %s have from connections", symbol->name);
+				return -1;
+			}
+			grammar_symbol_free(symbol);
+			list_remove_node(&(g->variables), node);
+		}
+		node = node2;
+	}
+
+	return 0;
+}
+
+int grammar_reduce_no_generators(struct grammar_t *g)
+{
+	return_if(grammar_reduce_no_generators_mark(g), -1);
+	return_if(grammar_reduce_no_generators_remove(g), -1);
 	return 0;
 }

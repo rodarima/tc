@@ -14,6 +14,7 @@ int grammar_disconnect_from_symbol(struct connector_t *connector);
 int grammar_disconnect_to_symbol(struct connector_t *connector);
 
 int grammar_disconnect_from(struct connector_t *connector);
+int grammar_disconnect_all(struct connector_t *connector);
 
 
 #endif /* _GRAMMAR_CONNECT_H_ */

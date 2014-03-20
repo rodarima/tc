@@ -270,3 +270,33 @@ int grammar_disconnect_to_symbol(struct connector_t *connector)
 	connector->sym = NULL;
 	return 0;
 }
+
+/*
+ * Disconnects a connector from all.
+ *
+ * Before:
+ *
+ *   A --> (C) --> D
+ *          |
+ *          v
+ *         (B)
+ *
+ * After:
+ *
+ *   A     (C)     D
+ *          
+ *          
+ *         (B)
+ *
+ */
+int grammar_disconnect_all(struct connector_t *connector)
+{
+	if(connector->from)
+		return_if(grammar_disconnect_from(connector), -1);
+	if(connector->sym)
+		return_if(grammar_disconnect_to_symbol(connector), -1);
+	if(connector->con)
+		grammar_disconnect_to_connector(connector);
+
+	return 0;
+}

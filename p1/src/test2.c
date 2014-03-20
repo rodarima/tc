@@ -48,12 +48,14 @@ int parse_file(int fd, struct grammar_t *g)
 	}
 	while(nc > 0);
 
-	grammar_print(g);
-	//grammar_graphviz_print(g);
+	//grammar_print(g);
+	grammar_graphviz_print(g);
 	if(grammar_reduce_no_generators(g))
 	{
 		printf("Fallo reduce\n");
 	}
+	grammar_print(g);
+	grammar_graphviz_print(g);
 	//grammar_print(g);
 
 	return 0;
