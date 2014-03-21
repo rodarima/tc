@@ -1,5 +1,3 @@
-#define NDEBUG
-
 #include "grammar_reduce.h"
 #include "grammar.h"
 #include "grammar_connect.h"
@@ -8,14 +6,148 @@
 #include "dbg.h"
 
 
-int is_connector_complete(struct connector_t *connector)
+int is_connector_complete(struct connector_t *connector, char mark)
 {
-	if(NODE_IS_MARKED(connector->sym, MARK_GEN))
+	if(NODE_IS_MARKED(connector->sym, mark))
 	{
-		if( (!connector->con) || NODE_IS_MARKED(connector->con, MARK_GEN) )
+		if( (!connector->con) || NODE_IS_MARKED(connector->con, mark) )
 		{
 			return 1;
 		}
+	}
+	return 0;
+}
+
+int grammar_reduce_mark_from(struct queue_t *queue, char mark)
+{
+	struct list_node_t *list_node;
+	void *last, *element, *from;
+	struct symbol_t *symbol;
+	struct connector_t *connector;
+	long iteration = 0;
+
+	debug("Okay, let's go");
+	last = queue->end->ptr;
+
+	queue_print(queue);
+	while(!queue_pop(queue, &element))
+	{
+		debug("---- Iteration %ld ----", iteration);
+		queue_print(queue);
+		debug("last = %p", last);
+
+		if(NODE_IS_TYPE(element, NODE_CON))
+		{
+			debug("Connector(%p)", element);
+			if(NODE_IS_MARKED(element, mark))
+			{
+				debug("This cannot happen %p", element);
+			}
+			if(!NODE_IS_MARKED(element, MARK_QUEUED))
+			{
+				debug("This cannot happen %p", element);
+			}
+			connector = (struct connector_t *) element;
+			if(is_connector_complete(connector, mark))
+			{
+				debug("It's complete, adding mark");
+				NODE_MARK(element, mark);
+				if(!IS_NODE_MARKED(connector->from, mark))
+				{
+					debug("%p is not marked as mark", connector->from);
+					if(!IS_NODE_TYPE(connector->from, NODE_CON))
+					{
+						debug("%p is not NODE_CON, marking as mark", connector->from);
+						NODE_MARK(connector->from, mark);
+					}
+					if(!IS_NODE_MARKED(connector->from, MARK_QUEUED))
+					{
+						debug("%p is not marked as MARK_QUEUED, marking", connector->from);
+						NODE_MARK(connector->from, MARK_QUEUED);
+						debug("Pushing %p", connector->from);
+						if(queue_push(queue, connector->from))
+						{
+							queue_clear(queue);
+							return -1;
+						}
+						debug("Last = %p", connector->from);
+						last = connector->from;
+					}
+					else
+					{
+						if(queue->end)
+						{
+							last = queue->end->ptr;
+						}
+					}
+				}
+				else
+				{
+					if(queue->end)
+					{
+						last = queue->end->ptr;
+					}
+				}
+			}
+			else if(last == element)
+			{
+				debug("last == element");
+				break;
+			}
+			else
+			{
+				debug("Adding connector to the queue, another time");
+				if(queue_push(queue, element))
+				{
+					queue_clear(queue);
+					return -1;
+				}
+				debug("last = %p", last);
+			}
+		}
+		else
+		{
+			debug("Symbol(%p)", element);
+			symbol = (struct symbol_t *) element;
+
+			list_node = symbol->from.start;
+
+
+			/* Find connections to the symbol */
+			debug("Listing symbol froms");
+			while(list_node)
+			{
+				debug("+- Node %p", list_node->ptr);
+				from = list_node->ptr;
+				/*
+				if(NODE_IS_MARKED(from, mark))
+				{
+					debug("??? This cannot happen %p", from);
+				}
+				*/
+				if(!NODE_IS_MARKED(from, MARK_QUEUED))
+				{
+					debug("   Node %p is not marked as MARK_QUEUED, pushing", from);
+					if(queue_push(queue, from))
+					{
+						queue_clear(queue);
+						return -1;
+					}
+					debug("   Marking as MARK_QUEUED");
+					NODE_MARK(from, MARK_QUEUED);
+				}
+				debug("   last = %p", from);
+				last = from;
+				list_node = list_node->next;
+			}
+			
+			if(last == symbol)
+			{
+				debug("Breaking last(%p) = symbol(%p)", last, symbol);
+				break;
+			}
+		}
+		iteration++;
 	}
 	return 0;
 }
@@ -25,10 +157,6 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 {
 	struct queue_t gen;
 	struct list_node_t *list_node;
-	void *last, *element, *from;
-	struct symbol_t *symbol;
-	struct connector_t *connector;
-	long iteration = 0;
 
 	queue_empty(&gen);
 	
@@ -43,8 +171,6 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 			queue_clear(&gen);
 			return -1;
 		}
-		last = list_node->ptr;
-		debug("last = %p", last);
 		list_node = list_node->next;
 	}
 
@@ -52,119 +178,11 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 	debug("Okay, let's go");
 
 	/* For each terminal, find all generators */
-	do
+	if(grammar_reduce_mark_from(&gen, MARK_GEN))
 	{
-		debug("---- Iteration %ld ----", iteration);
-		if(queue_pop(&gen, &element))
-		{
-			debug("ERROR FATAL");
-		}
-		debug("Popped %p", element);
-
-		if(NODE_IS_TYPE(element, NODE_CON))
-		{
-			debug("Type NODE_CON");
-			if(NODE_IS_MARKED(element, MARK_GEN))
-			{
-				debug("This cannot happen %p", element);
-			}
-			if(!NODE_IS_MARKED(element, MARK_QUEUED))
-			{
-				debug("This cannot happen %p", element);
-			}
-			connector = (struct connector_t *) element;
-			if(is_connector_complete(connector))
-			{
-				debug("It's complete, adding MARK_GEN");
-				NODE_MARK(element, MARK_GEN);
-				if(!IS_NODE_MARKED(connector->from, MARK_GEN))
-				{
-					debug("'from' is not marked as MARK_GEN");
-					if(!IS_NODE_TYPE(connector->from, NODE_CON))
-					{
-						debug("'from' is not NODE_CON, marking as MARK_GEN");
-						NODE_MARK(connector->from, MARK_GEN);
-					}
-					if(!IS_NODE_MARKED(connector->from, MARK_QUEUED))
-					{
-						debug("'from' is not marked as MARK_QUEUED, marking");
-						NODE_MARK(connector->from, MARK_QUEUED);
-						debug("Pushing 'from'");
-						if(queue_push(&gen, connector->from))
-						{
-							queue_clear(&gen);
-							return -1;
-						}
-						debug("Last = 'from'");
-						last = connector->from;
-					}
-					else
-					{
-						if(gen.end)
-						{
-							last = gen.end->ptr;
-						}
-					}
-				}
-				else
-				{
-					if(gen.end)
-					{
-						last = gen.end->ptr;
-					}
-				}
-			}
-			else if(last == element)
-			{
-				debug("last == element");
-				break;
-			}
-			else
-			{
-				debug("Adding connector to the queue, another time");
-				if(queue_push(&gen, element))
-				{
-					queue_clear(&gen);
-					return -1;
-				}
-				debug("last = %p", last);
-			}
-		}
-		else
-		{
-			debug("Type symbol");
-			symbol = (struct symbol_t *) element;
-
-			list_node = symbol->from.start;
-			/* Find connections to the symbol */
-			debug("Listing symbol froms");
-			while(list_node)
-			{
-				debug("Node %p", list_node->ptr);
-				from = list_node->ptr;
-				if(NODE_IS_MARKED(from, MARK_GEN))
-				{
-					debug("This cannot happen %p", from);
-				}
-				if(!NODE_IS_MARKED(from, MARK_QUEUED))
-				{
-					debug("Node %p is not marked as MARK_QUEUED, pushing", from);
-					if(queue_push(&gen, from))
-					{
-						queue_clear(&gen);
-						return -1;
-					}
-					debug("Marking as MARK_QUEUED");
-					NODE_MARK(from, MARK_QUEUED);
-				}
-				debug("last = %p", from);
-				last = from;
-				list_node = list_node->next;
-			}
-		}
-		iteration++;
+		queue_clear(&gen);
+		return -1;
 	}
-	while(gen.start);
 
 	queue_clear(&gen);
 	
@@ -563,4 +581,60 @@ int grammar_reduce_unreachables(struct grammar_t *g)
 	return 0;
 }
 
-#undef NDEBUG
+int grammar_reduce_e_productions_mark(struct grammar_t *g)
+{
+	struct queue_t nullable;
+	struct list_node_t *list_node;
+	struct symbol_t *symbol;
+	void *epsilon;
+
+	if(!(epsilon = list_find(&(g->terminals), (void *) SYM_EPSILON, grammar_cmp_str_symbol)))
+	{
+		printf("There is no ∈-productions (epsilon-productions)\n");
+		return 0;
+	}
+
+	queue_empty(&nullable);
+	NODE_MARK(epsilon, MARK_NULL);
+
+	if(queue_push(&nullable, epsilon))
+	{
+		return -1;
+	}
+	
+	if(grammar_reduce_mark_from(&nullable, MARK_NULL))
+	{
+		queue_clear(&nullable);
+		return -1;
+	}
+
+	queue_clear(&nullable);
+#if 1
+	printf("Marked variables are:\n");
+	list_node = g->variables.start;
+	while(list_node)
+	{
+		symbol = (struct symbol_t *) list_node->ptr;
+		if(NODE_IS_MARKED(symbol, MARK_NULL))
+		{
+			grammar_symbol_print(symbol);
+		}
+		list_node = list_node->next;
+	}
+#endif
+
+	return 0;
+}
+
+int grammar_reduce_e_productions_remove(struct grammar_t *g)
+{
+	
+
+	return 0;
+}
+
+int grammar_reduce_e_productions(struct grammar_t *g)
+{
+	return_if(grammar_reduce_e_productions_mark(g), -1);
+	return 0;
+}
