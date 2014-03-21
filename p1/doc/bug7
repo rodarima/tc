@@ -1,0 +1,54 @@
+3 rules loaded
+DEBUG grammar_reduce.c:37: Adding terminal 0xdbd160
+DEBUG grammar_reduce.c:45: last = 0xdbd160
+DEBUG grammar_reduce.c:50: Okay, let's go
+DEBUG grammar_reduce.c:55: ---- Iteration 0 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd160
+DEBUG grammar_reduce.c:133: Type symbol
+DEBUG grammar_reduce.c:138: Listing symbol froms
+DEBUG grammar_reduce.c:141: Node 0xdbd0d0
+DEBUG grammar_reduce.c:149: Node 0xdbd0d0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:155: Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:158: last = 0xdbd0d0
+DEBUG grammar_reduce.c:141: Node 0xdbd2d0
+DEBUG grammar_reduce.c:149: Node 0xdbd2d0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:155: Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:158: last = 0xdbd2d0
+DEBUG grammar_reduce.c:141: Node 0xdbd360
+DEBUG grammar_reduce.c:149: Node 0xdbd360 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:155: Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:158: last = 0xdbd360
+DEBUG grammar_reduce.c:55: ---- Iteration 1 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd0d0
+DEBUG grammar_reduce.c:64: Type NODE_CON
+DEBUG grammar_reduce.c:122: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:128: last = 0xdbd360
+DEBUG grammar_reduce.c:55: ---- Iteration 2 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd2d0
+DEBUG grammar_reduce.c:64: Type NODE_CON
+DEBUG grammar_reduce.c:76: It's complete, adding MARK_GEN
+DEBUG grammar_reduce.c:80: 0xdbd070 is not marked as MARK_GEN
+DEBUG grammar_reduce.c:83: 0xdbd070 is not NODE_CON, marking as MARK_GEN
+DEBUG grammar_reduce.c:88: 0xdbd070 is not marked as MARK_QUEUED, marking
+DEBUG grammar_reduce.c:90: Pushing 0xdbd070
+DEBUG grammar_reduce.c:96: Last = 0xdbd070
+DEBUG grammar_reduce.c:55: ---- Iteration 3 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd360
+DEBUG grammar_reduce.c:64: Type NODE_CON
+DEBUG grammar_reduce.c:122: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:128: last = 0xdbd070
+DEBUG grammar_reduce.c:55: ---- Iteration 4 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd0d0
+DEBUG grammar_reduce.c:64: Type NODE_CON
+DEBUG grammar_reduce.c:122: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:128: last = 0xdbd070
+DEBUG grammar_reduce.c:55: ---- Iteration 5 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd070
+DEBUG grammar_reduce.c:133: Type symbol
+DEBUG grammar_reduce.c:138: Listing symbol froms
+DEBUG grammar_reduce.c:55: ---- Iteration 6 ----
+DEBUG grammar_reduce.c:60: Popped 0xdbd360
+DEBUG grammar_reduce.c:64: Type NODE_CON
+DEBUG grammar_reduce.c:122: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:128: last = 0xdbd070
+DEBUG grammar_reduce.c:55: ---- Iteration 7 ----
