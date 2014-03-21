@@ -28,6 +28,22 @@ void queue_clear(struct queue_t *queue)
 	queue_empty(queue);
 }
 
+/* Prints all elements in a queue */
+void queue_print(struct queue_t *queue)
+{
+	struct queue_node_t *node;
+	
+	printf("%p = { ", queue);
+	node = queue->start;
+	while(node)
+	{
+		printf("%p", node->ptr);
+		if(node->next) printf(", ");
+		node = node->next;
+	}
+	printf(" }\n");
+}
+
 /* Delete all elements in a queue, and apply func before */
 void queue_clear_func(struct queue_t *queue, void (*func)(void *))
 {

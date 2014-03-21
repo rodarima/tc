@@ -23,6 +23,9 @@ void queue_empty(struct queue_t *queue);
 /* Delete all elements in a queue */
 void queue_clear(struct queue_t *queue);
 
+/* Prints all elements in a queue */
+void queue_print(struct queue_t *queue);
+
 /* Delete all elements in a queue, and apply func before */
 void queue_clear_func(struct queue_t *queue, void (*func)(void *));
 
