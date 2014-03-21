@@ -62,7 +62,12 @@ int parse_file(int fd, struct grammar_t *g)
 	{
 		printf("Failed reduce unreachables\n");
 	}
-	//grammar_print(g);
+	if(grammar_reduce_e_productions(g))
+	{
+		printf("Failed reduce epsilon-productions\n");
+	}
+
+	grammar_print(g);
 	//grammar_graphviz_print(g);
 	//grammar_print(g);
 
