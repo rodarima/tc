@@ -8,7 +8,10 @@
 #define MARK_QUEUED	1<<7
 #define MARK_GEN	1<<6
 #define MARK_REACH	1<<5
+#define MARK_NULL	1<<4
 #define MARK_ALL	~0x03
+
+#define SYM_EPSILON	""
 
 /* TYPE QGXX XXTT */
 
@@ -82,6 +85,7 @@ int grammar_symbol_new(struct grammar_t *g, struct symbol_t **symbol, const char
 void grammar_symbol_free(struct symbol_t *symbol);
 void grammar_symbol_print(struct symbol_t *s);
 void grammar_node_print(void *node);
+int grammar_cmp_str_symbol(const void *a, const void *b);
 
 
 int grammar_clean_no_generators(struct grammar_t *g);
