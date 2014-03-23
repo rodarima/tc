@@ -1,4 +1,5 @@
 CC = gcc
+#CFLAGS = -g -Wall -Wextra
 CFLAGS = -g -Wall
 
 test: readl.o parse_std.o list.o grammar.o
