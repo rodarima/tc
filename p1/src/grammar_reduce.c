@@ -187,6 +187,7 @@ int grammar_reduce_no_generators_mark(struct grammar_t *g)
 	queue_clear(&gen);
 	
 #if 0
+	struct symbol_t *symbol;
 	printf("Marked variables are:\n");
 	list_node = g->variables.start;
 	while(list_node)
@@ -581,18 +582,11 @@ int grammar_reduce_unreachables(struct grammar_t *g)
 	return 0;
 }
 
-int grammar_reduce_e_productions_mark(struct grammar_t *g)
+int grammar_reduce_e_productions_mark(struct grammar_t *g, struct symbol_t *epsilon)
 {
 	struct queue_t nullable;
 	struct list_node_t *list_node;
 	struct symbol_t *symbol;
-	void *epsilon;
-
-	if(!(epsilon = list_find(&(g->terminals), (void *) SYM_EPSILON, grammar_cmp_str_symbol)))
-	{
-		printf("There is no ∈-productions (epsilon-productions)\n");
-		return 0;
-	}
 
 	queue_empty(&nullable);
 	NODE_MARK(epsilon, MARK_NULL);
@@ -609,7 +603,7 @@ int grammar_reduce_e_productions_mark(struct grammar_t *g)
 	}
 
 	queue_clear(&nullable);
-#if 1
+#if 0
 	printf("Marked variables are:\n");
 	list_node = g->variables.start;
 	while(list_node)
@@ -764,6 +758,83 @@ int grammar_reduce_e_productions_symbol(struct grammar_t *g, struct symbol_t *s)
 	return 0;
 }
 
+int grammar_reduce_e_productions_remove_epsilon(struct grammar_t *g, 
+	struct symbol_t *epsilon)
+{
+	struct list_node_t *node, *next;
+	struct connector_t *connector, *tmp, *tmp2;
+	struct symbol_t *symbol;
+
+	node = epsilon->from.start;
+	while(node)
+	{
+		next = node->next;
+		connector = (struct connector_t *) node->ptr;
+		if(!connector->con)
+		{
+			if(!NODE_IS_TYPE(connector->from, NODE_CON))
+			{
+				// A->e
+				return_if(grammar_disconnect_from_symbol(connector), -1);
+				return_if(grammar_disconnect_to_symbol(connector), -1);
+			}
+			else
+			{
+				// A->o->e
+				return_if(grammar_disconnect_to_symbol(connector), -1);
+				grammar_disconnect_from_connector(connector);
+			}
+		}
+		else
+		{
+			if(!NODE_IS_TYPE(connector->from, NODE_CON))
+			{
+				//A->e
+				symbol = (struct symbol_t *) connector->from;
+				tmp = connector->con;
+				return_if(grammar_disconnect_to_symbol(connector), -1);
+				return_if(grammar_disconnect_from_symbol(connector), -1);
+				grammar_disconnect_to_connector(connector);
+				return_if(grammar_connect_from_symbol(tmp, symbol), -1);
+			}
+			else
+			{
+				//A-o->e
+				tmp = (struct connector_t *) connector->from;
+				tmp2 = (struct connector_t *) connector->con;
+				return_if(grammar_disconnect_to_symbol(connector), -1);
+				grammar_disconnect_from_connector(connector);
+				grammar_disconnect_to_connector(connector);
+				grammar_connect_to_connector(tmp, tmp2);
+
+			}
+		}
+		return_if(list_remove(&(g->connectors), connector), -1);
+		grammar_connector_free(connector);
+		node = next;
+	}
+	return 0;
+}
+
+int grammar_reduce_e_productions_add_start(struct grammar_t *g, 
+	struct symbol_t *epsilon)
+{
+	struct connector_t *connector;
+
+	if(!g->start)
+	{
+		debug("No start symbol defined");
+		return -1;
+	}
+	if(NODE_IS_MARKED(g->start, MARK_NULL))
+	{
+		return_if(grammar_connector_new(g, &connector), -1);
+		return_if(grammar_connect_from_symbol(connector, g->start), -1);
+		return_if(grammar_connect_to_symbol(connector, epsilon), -1);
+	}
+	return 0;
+}
+
 int grammar_reduce_e_productions_remove(struct grammar_t *g)
 {
 	struct symbol_t *symbol;
@@ -787,9 +858,147 @@ int grammar_reduce_e_productions_remove(struct grammar_t *g)
 	return 0;
 }
 
+int grammar_reduce_e_productions_find_epsilon(struct grammar_t *g, 
+	struct symbol_t **epsilon)
+{
+	if(!(*epsilon = list_find(&(g->terminals), 
+		(void *) SYM_EPSILON, grammar_cmp_str_symbol)))
+	{
+		debug("There is no ∈-productions (epsilon-productions)");
+		return -1;
+	}
+	return 0;
+}
+
 int grammar_reduce_e_productions(struct grammar_t *g)
 {
-	return_if(grammar_reduce_e_productions_mark(g), -1);
+	struct symbol_t *epsilon;
+	return_if(grammar_reduce_e_productions_find_epsilon(g, &epsilon), 0);
+	return_if(grammar_reduce_e_productions_mark(g, epsilon), -1);
 	return_if(grammar_reduce_e_productions_remove(g), -1);
+	return_if(grammar_reduce_e_productions_remove_epsilon(g, epsilon), -1);
+	return_if(grammar_reduce_e_productions_add_start(g, epsilon), -1);
+	grammar_reduce_unmark(g);
+	return 0;
+}
+
+int grammar_reduce_is_unitary(struct connector_t *c)
+{
+	if(NODE_IS_TYPE(c->from, NODE_CON))
+	{
+		return 0;
+	}
+	if(c->con)
+	{
+		return 0;
+	}
+	if(NODE_IS_TYPE(c->sym, NODE_TER))
+	{
+		return 0;
+	}
+	return 1;
+}
+
+int grammar_reduce_unitary_duplicate_path(struct grammar_t *g,
+	struct symbol_t *s, struct connector_t *c)
+{
+	struct connector_t *tmp, *tmp2;
+
+	debug("Duplicating path from %p to symbol %s (%p)", c, s->name, s);
+
+	return_if(grammar_connector_new(g, &tmp), -1);
+
+	return_if(grammar_connect_from_symbol(tmp, s), -1);
+	return_if(grammar_connect_to_symbol(tmp, c->sym), -1);
+	debug("First connector from %s (%p) now is %p to symbol %s (%p)", 
+		s->name, s, tmp, tmp->sym->name, tmp->sym);
+
+	c = c->con;
+	while(c)
+	{
+		return_if(grammar_connector_new(g, &tmp2), -1);
+		grammar_connect_from_connector(tmp2, tmp);
+		return_if(grammar_connect_to_symbol(tmp2, c->sym), -1);
+		
+		debug("New connector from %s (%p) now is %p to symbol %s (%p)", 
+			s->name, s, tmp2, tmp2->sym->name, tmp2->sym);
+		
+		tmp = tmp2;
+
+		c = c->con;
+	}
+
+	return 0;
+}
+	
+int grammar_reduce_unitary_connector(struct grammar_t *g, struct connector_t *c)
+{
+	struct symbol_t *from, *symbol;
+	struct connector_t *connector;
+	struct list_node_t *node, *end;
+
+	from = (struct symbol_t *) c->from;
+	symbol = c->sym;
+
+	node = symbol->to.start;
+	end = symbol->to.end;
+	while(node)
+	{
+		connector = node->ptr;
+		/* Prevent A=A */
+		debug("Trying connector %p", connector);
+		if((connector->sym != from) || (connector->con))
+		{
+			debug("%s != %s", connector->sym->name, from->name);
+			if(grammar_reduce_unitary_duplicate_path(g, from, connector))
+			{
+				return -1;
+			}
+		}
+
+		if(end == node)
+		{
+			debug("Original end reached, breaking");
+			break;
+		}
+		node = node->next;
+	}
+	
+	return 0;
+}
+
+int grammar_reduce_unitary(struct grammar_t *g)
+{
+	struct list_node_t *node, *next;
+	struct symbol_t *from, *symbol;
+	struct connector_t *connector;
+	
+	node = g->connectors.start;
+	while(node)
+	{
+		next = node->next;
+		connector = (struct connector_t *) node->ptr;
+		/* All new nodes will be added to the end */
+		if(grammar_reduce_is_unitary(connector))
+		{
+			symbol = (struct symbol_t *) connector->from;
+			debug("Deleting unitary connection %p %s->%s",
+				connector, symbol->name, connector->sym->name);
+
+			grammar_reduce_unitary_connector(g, connector);
+			/* Delete connection */
+			from = connector->from;
+			grammar_disconnect_all(connector);
+			if(!from->to.start)
+			{
+				debug("WARNING, variable %s isolated", from->name);
+			}
+			grammar_connector_free(connector);
+			list_remove_node(&(g->connectors), node);
+			grammar_rules_print(g);
+		}
+
+		node = next;
+	}
 	return 0;
 }
