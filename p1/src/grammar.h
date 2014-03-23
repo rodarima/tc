@@ -74,6 +74,7 @@ struct grammar_t
 int grammar_init(struct grammar_t **g);
 void grammar_free(struct grammar_t *g);
 void grammar_print(struct grammar_t *g);
+void grammar_rules_print(struct grammar_t *g);
 
 int grammar_connector_new(struct grammar_t *g, struct connector_t **connector);
 void grammar_connector_free(struct connector_t *connector);

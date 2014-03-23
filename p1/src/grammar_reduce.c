@@ -626,15 +626,170 @@ int grammar_reduce_e_productions_mark(struct grammar_t *g)
 	return 0;
 }
 
+/* TODO: Add to grammar.c */
+int grammar_connector_duplicate(struct grammar_t *g,
+	struct connector_t *c, struct connector_t **clone)
+{
+	//struct connector_t *connector;
+	struct symbol_t *symbol;
+
+	return_if(grammar_connector_new(g, clone), -1);
+	
+	if(NODE_IS_TYPE(c->from, NODE_CON))
+	{
+		//connector = (struct connector_t *) c->from;
+		(*clone)->from = c->from;
+		//grammar_connect_from_connector(*clone, connector);
+	}
+	else
+	{
+		symbol = (struct symbol_t *) c->from;
+		debug("Symbol = %p", symbol);
+		return_if(grammar_connect_from_symbol(*clone, symbol), -1);
+	}
+	return_if(grammar_connect_to_symbol(*clone, c->sym), -1);
+	if(c->con)
+	{
+		(*clone)->con = c->con;
+		//grammar_connect_to_connector(*clone, c->con);
+	}
+	return 0;
+}
+
+int grammar_reduce_e_productions_connector_from(struct grammar_t *g,
+	struct symbol_t *s, struct connector_t *c, void **side)
+{
+	struct connector_t *tmp;
+
+	if(NODE_IS_TYPE(c->from, NODE_CON))
+	{
+		debug("First duplicate %p", c->from);
+		return_if(grammar_connector_duplicate(g, c->from, &tmp), -1);
+		debug("%p is now at %p too", c->from, tmp);
+		tmp->con = NULL;
+		*side = tmp;
+		c = tmp;
+	}
+	else
+	{
+		*side = c->from;
+		return 0;
+	}
+	while(NODE_IS_TYPE(c->from, NODE_CON))
+	{
+		debug("Duplicating %p", c->from);
+		return_if(grammar_connector_duplicate(g, c->from, &tmp), -1);
+		debug("%p is now at %p too", c->from, tmp);
+		c->from = tmp;
+		tmp->con = c;
+
+		c = c->from;
+	}
+	return 0;
+}
+
+int grammar_reduce_e_productions_connector_to(struct grammar_t *g,
+	struct symbol_t *s, struct connector_t *c, void *side)
+{
+	struct connector_t *tmp, *from;
+
+	if(c->con)
+	{
+		debug("First duplicate %p", c->con);
+		return_if(grammar_connector_duplicate(g, c->con, &tmp), -1);
+		debug("%p is now at %p too", c->con, tmp);
+		if(NODE_IS_TYPE(side, NODE_CON))
+		{
+			grammar_connect_from_connector(tmp, side);
+		}
+		else
+		{
+			return_if(grammar_connect_from_symbol(tmp, side), -1);
+		}
+		//tmp->from = side;
+		c = tmp;
+	}
+	else
+	{
+		if(NODE_IS_TYPE(side, NODE_CON))
+		{
+			from = (struct connector_t *) side;
+			from->con = NULL;
+			//return_if(grammar_connect_to_symbol(from, c->sym), -1);
+		}
+		return 0;
+	}
+	while(c->con)
+	{
+		debug("Duplicating %p", c->con);
+		return_if(grammar_connector_duplicate(g, c->con, &tmp), -1);
+		debug("%p is now at %p too", c->con, tmp);
+		grammar_connect_to_connector(c, tmp);
+
+		c = tmp;
+	}
+	return 0;
+}
+
+int grammar_reduce_e_productions_connector(struct grammar_t *g,
+	struct symbol_t *s, struct connector_t *c)
+{
+	void *side;
+
+	/* XXX: If fails, then grammar becomes inestable */
+	return_if(grammar_reduce_e_productions_connector_from(g, s, c, &side), -1);
+	return_if(grammar_reduce_e_productions_connector_to(g, s, c, side), -1);
+	return 0;
+}
+
+int grammar_reduce_e_productions_symbol(struct grammar_t *g, struct symbol_t *s)
+{
+	struct list_node_t *node, *end;
+	struct connector_t *connector;
+
+	node = s->from.start;
+	end = s->from.end;
+	while(node)
+	{
+		connector = (struct connector_t *) node->ptr;
+		debug("Symbol %s connector(%p)", s->name, connector);
+		if(grammar_reduce_e_productions_connector(g, s, connector))
+		{
+			return -1;
+		}
+
+		if(node == end) break;
+		node = node->next;
+	}
+	return 0;
+}
+
 int grammar_reduce_e_productions_remove(struct grammar_t *g)
 {
-	
+	struct symbol_t *symbol;
+	struct list_node_t *node;
 
+	node = g->variables.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		if(NODE_IS_MARKED(symbol, MARK_NULL))
+		{
+			debug("Symbol %s (%p)", symbol->name, symbol);
+			if(grammar_reduce_e_productions_symbol(g, symbol))
+			{
+				return -1;
+			}
+		}
+		node = node->next;
+	}
+	
 	return 0;
 }
 
 int grammar_reduce_e_productions(struct grammar_t *g)
 {
 	return_if(grammar_reduce_e_productions_mark(g), -1);
+	return_if(grammar_reduce_e_productions_remove(g), -1);
 	return 0;
 }

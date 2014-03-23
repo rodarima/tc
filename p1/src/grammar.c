@@ -52,6 +52,51 @@ void grammar_print(struct grammar_t *g)
 	printf("---- END GRAMMAR ----\n");
 }
 
+void grammar_rules_print(struct grammar_t *g)
+{
+	struct list_node_t *node, *node2;
+	struct connector_t *connector;
+	struct symbol_t *symbol;
+
+	node = g->variables.start;
+	while(node)
+	{
+		symbol = (struct symbol_t *) node->ptr;
+		
+		node2 = symbol->to.start;
+		printf("%s -> ", symbol->name);
+		while(node2)
+		{
+			connector = node2->ptr;
+			if(strcmp(connector->sym->name, SYM_EPSILON)==0)
+			{
+				printf("∈");
+			}
+			else
+			{
+				printf("%s", connector->sym->name);
+			}
+			
+			while(connector->con)
+			{
+				if(strcmp(connector->con->sym->name, SYM_EPSILON)==0)
+				{
+					printf(",∈");
+				}
+				else
+				{
+					printf(",%s", connector->con->sym->name);
+				}
+				connector = connector->con;
+			}
+			if(node2->next) printf(" | ");
+			node2 = node2->next;
+		}
+		node = node->next;
+		printf("\n");
+	}
+}
+
 int grammar_connector_new(struct grammar_t *g, struct connector_t **connector)
 {
 	*connector = calloc(1, sizeof(struct connector_t));

@@ -31,6 +31,7 @@ void queue_clear(struct queue_t *queue)
 /* Prints all elements in a queue */
 void queue_print(struct queue_t *queue)
 {
+#ifndef NDEBUG
 	struct queue_node_t *node;
 	
 	printf("%p = { ", queue);
@@ -42,6 +43,7 @@ void queue_print(struct queue_t *queue)
 		node = node->next;
 	}
 	printf(" }\n");
+#endif
 }
 
 /* Delete all elements in a queue, and apply func before */
