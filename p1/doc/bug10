@@ -1,0 +1,290 @@
+DEBUG grammar_reduce.c:29: Okay, let's go
+DEBUG grammar_reduce.c:35: ---- Iteration 0 ----
+DEBUG grammar_reduce.c:37: last = 0x16e2540
+DEBUG grammar_reduce.c:110: Symbol(0x16e2540)
+DEBUG grammar_reduce.c:117: Listing symbol froms
+DEBUG grammar_reduce.c:120: +- Node 0x16e24b0
+DEBUG grammar_reduce.c:130:    Node 0x16e24b0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e24b0
+DEBUG grammar_reduce.c:120: +- Node 0x16e25c0
+DEBUG grammar_reduce.c:130:    Node 0x16e25c0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e25c0
+DEBUG grammar_reduce.c:120: +- Node 0x16e2650
+DEBUG grammar_reduce.c:130:    Node 0x16e2650 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e2650
+DEBUG grammar_reduce.c:120: +- Node 0x16e26e0
+DEBUG grammar_reduce.c:130:    Node 0x16e26e0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e26e0
+DEBUG grammar_reduce.c:35: ---- Iteration 1 ----
+DEBUG grammar_reduce.c:37: last = 0x16e26e0
+DEBUG grammar_reduce.c:41: Connector(0x16e24b0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e2160 is not marked as mark
+DEBUG grammar_reduce.c:60: 0x16e2160 is not NODE_CON, marking as mark
+DEBUG grammar_reduce.c:65: 0x16e2160 is not marked as MARK_QUEUED, marking
+DEBUG grammar_reduce.c:67: Pushing 0x16e2160
+DEBUG grammar_reduce.c:73: Last = 0x16e2160
+DEBUG grammar_reduce.c:35: ---- Iteration 2 ----
+DEBUG grammar_reduce.c:37: last = 0x16e2160
+DEBUG grammar_reduce.c:41: Connector(0x16e25c0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e2250 is not marked as mark
+DEBUG grammar_reduce.c:60: 0x16e2250 is not NODE_CON, marking as mark
+DEBUG grammar_reduce.c:65: 0x16e2250 is not marked as MARK_QUEUED, marking
+DEBUG grammar_reduce.c:67: Pushing 0x16e2250
+DEBUG grammar_reduce.c:73: Last = 0x16e2250
+DEBUG grammar_reduce.c:35: ---- Iteration 3 ----
+DEBUG grammar_reduce.c:37: last = 0x16e2250
+DEBUG grammar_reduce.c:41: Connector(0x16e2650)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e2340 is not marked as mark
+DEBUG grammar_reduce.c:60: 0x16e2340 is not NODE_CON, marking as mark
+DEBUG grammar_reduce.c:65: 0x16e2340 is not marked as MARK_QUEUED, marking
+DEBUG grammar_reduce.c:67: Pushing 0x16e2340
+DEBUG grammar_reduce.c:73: Last = 0x16e2340
+DEBUG grammar_reduce.c:35: ---- Iteration 4 ----
+DEBUG grammar_reduce.c:37: last = 0x16e2340
+DEBUG grammar_reduce.c:41: Connector(0x16e26e0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e2430 is not marked as mark
+DEBUG grammar_reduce.c:60: 0x16e2430 is not NODE_CON, marking as mark
+DEBUG grammar_reduce.c:65: 0x16e2430 is not marked as MARK_QUEUED, marking
+DEBUG grammar_reduce.c:67: Pushing 0x16e2430
+DEBUG grammar_reduce.c:73: Last = 0x16e2430
+DEBUG grammar_reduce.c:35: ---- Iteration 5 ----
+DEBUG grammar_reduce.c:37: last = 0x16e2430
+DEBUG grammar_reduce.c:110: Symbol(0x16e2160)
+DEBUG grammar_reduce.c:117: Listing symbol froms
+DEBUG grammar_reduce.c:120: +- Node 0x16e20d0
+DEBUG grammar_reduce.c:130:    Node 0x16e20d0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e20d0
+DEBUG grammar_reduce.c:35: ---- Iteration 6 ----
+DEBUG grammar_reduce.c:37: last = 0x16e20d0
+DEBUG grammar_reduce.c:110: Symbol(0x16e2250)
+DEBUG grammar_reduce.c:117: Listing symbol froms
+DEBUG grammar_reduce.c:120: +- Node 0x16e21e0
+DEBUG grammar_reduce.c:130:    Node 0x16e21e0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e21e0
+DEBUG grammar_reduce.c:35: ---- Iteration 7 ----
+DEBUG grammar_reduce.c:37: last = 0x16e21e0
+DEBUG grammar_reduce.c:110: Symbol(0x16e2340)
+DEBUG grammar_reduce.c:117: Listing symbol froms
+DEBUG grammar_reduce.c:120: +- Node 0x16e22d0
+DEBUG grammar_reduce.c:130:    Node 0x16e22d0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e22d0
+DEBUG grammar_reduce.c:35: ---- Iteration 8 ----
+DEBUG grammar_reduce.c:37: last = 0x16e22d0
+DEBUG grammar_reduce.c:110: Symbol(0x16e2430)
+DEBUG grammar_reduce.c:117: Listing symbol froms
+DEBUG grammar_reduce.c:120: +- Node 0x16e23c0
+DEBUG grammar_reduce.c:130:    Node 0x16e23c0 is not marked as MARK_QUEUED, pushing
+DEBUG grammar_reduce.c:136:    Marking as MARK_QUEUED
+DEBUG grammar_reduce.c:139:    last = 0x16e23c0
+DEBUG grammar_reduce.c:35: ---- Iteration 9 ----
+DEBUG grammar_reduce.c:37: last = 0x16e23c0
+DEBUG grammar_reduce.c:41: Connector(0x16e20d0)
+DEBUG grammar_reduce.c:99: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:105: last = 0x16e23c0
+DEBUG grammar_reduce.c:35: ---- Iteration 10 ----
+DEBUG grammar_reduce.c:37: last = 0x16e23c0
+DEBUG grammar_reduce.c:41: Connector(0x16e21e0)
+DEBUG grammar_reduce.c:99: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:105: last = 0x16e23c0
+DEBUG grammar_reduce.c:35: ---- Iteration 11 ----
+DEBUG grammar_reduce.c:37: last = 0x16e23c0
+DEBUG grammar_reduce.c:41: Connector(0x16e22d0)
+DEBUG grammar_reduce.c:99: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:105: last = 0x16e23c0
+DEBUG grammar_reduce.c:35: ---- Iteration 12 ----
+DEBUG grammar_reduce.c:37: last = 0x16e23c0
+DEBUG grammar_reduce.c:41: Connector(0x16e23c0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e22d0 is not marked as mark
+DEBUG grammar_reduce.c:35: ---- Iteration 13 ----
+DEBUG grammar_reduce.c:37: last = 0x16e22d0
+DEBUG grammar_reduce.c:41: Connector(0x16e20d0)
+DEBUG grammar_reduce.c:99: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:105: last = 0x16e22d0
+DEBUG grammar_reduce.c:35: ---- Iteration 14 ----
+DEBUG grammar_reduce.c:37: last = 0x16e22d0
+DEBUG grammar_reduce.c:41: Connector(0x16e21e0)
+DEBUG grammar_reduce.c:99: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:105: last = 0x16e22d0
+DEBUG grammar_reduce.c:35: ---- Iteration 15 ----
+DEBUG grammar_reduce.c:37: last = 0x16e22d0
+DEBUG grammar_reduce.c:41: Connector(0x16e22d0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e21e0 is not marked as mark
+DEBUG grammar_reduce.c:35: ---- Iteration 16 ----
+DEBUG grammar_reduce.c:37: last = 0x16e21e0
+DEBUG grammar_reduce.c:41: Connector(0x16e20d0)
+DEBUG grammar_reduce.c:99: Adding connector to the queue, another time
+DEBUG grammar_reduce.c:105: last = 0x16e21e0
+DEBUG grammar_reduce.c:35: ---- Iteration 17 ----
+DEBUG grammar_reduce.c:37: last = 0x16e21e0
+DEBUG grammar_reduce.c:41: Connector(0x16e21e0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e20d0 is not marked as mark
+DEBUG grammar_reduce.c:35: ---- Iteration 18 ----
+DEBUG grammar_reduce.c:37: last = 0x16e20d0
+DEBUG grammar_reduce.c:41: Connector(0x16e20d0)
+DEBUG grammar_reduce.c:53: It's complete, adding mark
+DEBUG grammar_reduce.c:57: 0x16e2070 is not marked as mark
+DEBUG grammar_reduce.c:60: 0x16e2070 is not NODE_CON, marking as mark
+DEBUG grammar_reduce.c:65: 0x16e2070 is not marked as MARK_QUEUED, marking
+DEBUG grammar_reduce.c:67: Pushing 0x16e2070
+DEBUG grammar_reduce.c:73: Last = 0x16e2070
+DEBUG grammar_reduce.c:35: ---- Iteration 19 ----
+DEBUG grammar_reduce.c:37: last = 0x16e2070
+DEBUG grammar_reduce.c:110: Symbol(0x16e2070)
+DEBUG grammar_reduce.c:117: Listing symbol froms
+DEBUG grammar_reduce.c:146: Breaking last(0x16e2070) = symbol(0x16e2070)
+DEBUG grammar_reduce.c:762: Symbol S (0x16e2070)
+DEBUG grammar_reduce.c:762: Symbol A (0x16e2160)
+DEBUG grammar_reduce.c:739: Symbol A connector(0x16e20d0)
+DEBUG grammar_connect.c:64: src->con != NULL
+DEBUG grammar_connect.c:65: connector->from != NULL
+DEBUG grammar_connect.c:65: connector->from != NULL
+DEBUG grammar_reduce.c:762: Symbol B (0x16e2250)
+DEBUG grammar_reduce.c:739: Symbol B connector(0x16e21e0)
+DEBUG grammar_reduce.c:647: Symbol = 0x16e2070
+DEBUG grammar_connect.c:65: connector->from != NULL
+DEBUG grammar_reduce.c:739: Symbol B connector(0x16e27f0)
+DEBUG grammar_reduce.c:677: c->from(0x16e21e0)
+DEBUG grammar_reduce.c:677: c->from(0x16e20d0)
+DEBUG grammar_reduce.c:647: Symbol = 0x16e2070
+DEBUG grammar_connect.c:65: connector->from != NULL
+DEBUG grammar_reduce.c:762: Symbol C (0x16e2340)
+DEBUG grammar_reduce.c:739: Symbol C connector(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
+DEBUG grammar_reduce.c:677: c->from(0x16e2850)
+DEBUG grammar_reduce.c:677: c->from(0x16e22d0)
