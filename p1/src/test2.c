@@ -60,30 +60,42 @@ int parse_file(int fd, struct grammar_t *g)
 	while(nc > 0);
 	printf("%ld rules loaded\n", rules);
 
-	grammar_rules_print(g);
 	//grammar_print(g);
 	//grammar_graphviz_print(g);
 	t =  u_sec();
 	/*
-	if(grammar_reduce_no_generators(g))
-	{
-		printf("Failed reduce no-generators\n");
-	}
-	if(grammar_reduce_unreachables(g))
-	{
-		printf("Failed reduce unreachables\n");
-	}
 	*/
+	//grammar_print(g);
+	grammar_rules_print(g);
 	if(grammar_reduce_e_productions(g))
 	{
 		printf("Failed reduce epsilon-productions\n");
 	}
-
+	//grammar_print(g);
+	//grammar_rules_print(g);
+	if(grammar_reduce_unitary(g))
+	{
+		printf("Failed reduce unitary\n");
+	}
+	//grammar_print(g);
+	//grammar_rules_print(g);
+	if(grammar_reduce_no_generators(g))
+	{
+		printf("Failed reduce no-generators\n");
+	}
+	//grammar_print(g);
+	//grammar_rules_print(g);
+	if(grammar_reduce_unreachables(g))
+	{
+		printf("Failed reduce unreachables\n");
+	}
+	//grammar_print(g);
+	grammar_rules_print(g);
 	t = u_sec() - t;
-	printf("Total %f usec\n", t);
+	//printf("Total %f usec\n", t);
 	//grammar_print(g);
 	//grammar_graphviz_print(g);
-	grammar_rules_print(g);
+	//grammar_rules_print(g);
 
 	//grammar_print(g);
 
