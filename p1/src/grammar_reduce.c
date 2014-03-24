@@ -869,6 +869,7 @@ int grammar_reduce_e_productions_find_epsilon(struct grammar_t *g,
 		(void *) SYM_EPSILON, grammar_cmp_str_symbol)))
 	{
 		debug("There is no ∈-productions (epsilon-productions)");
+		printf("Removed 0 null productions\n");
 		return -1;
 	}
 	return 0;

@@ -64,36 +64,36 @@ void grammar_rules_print(struct grammar_t *g)
 		symbol = (struct symbol_t *) node->ptr;
 		
 		node2 = symbol->to.start;
-		printf("%s -> ", symbol->name);
+		fprintf(stderr,"%s -> ", symbol->name);
 		while(node2)
 		{
 			connector = node2->ptr;
 			if(strcmp(connector->sym->name, SYM_EPSILON)==0)
 			{
-				printf("∈");
+				fprintf(stderr,"∈");
 			}
 			else
 			{
-				printf("%s", connector->sym->name);
+				fprintf(stderr,"%s", connector->sym->name);
 			}
 			
 			while(connector->con)
 			{
 				if(strcmp(connector->con->sym->name, SYM_EPSILON)==0)
 				{
-					printf(",∈");
+					fprintf(stderr,",∈");
 				}
 				else
 				{
-					printf(",%s", connector->con->sym->name);
+					fprintf(stderr,",%s", connector->con->sym->name);
 				}
 				connector = connector->con;
 			}
-			if(node2->next) printf(" | ");
+			if(node2->next) fprintf(stderr," | ");
 			node2 = node2->next;
 		}
 		node = node->next;
-		printf("\n");
+		fprintf(stderr,"\n");
 	}
 }
 
