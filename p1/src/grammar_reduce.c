@@ -982,18 +982,17 @@ int grammar_reduce_unitary_connector(struct grammar_t *g, struct connector_t *c)
 	return 0;
 }
 
-int grammar_reduce_unitary_symbol(struct grammar_t *g, struct symbol_t *symbol)
+int grammar_reduce_unitary_symbol(struct grammar_t *g, struct symbol_t *symbol, long *deleted)
 {
 	struct list_node_t *node, *node2, *next;
 	struct connector_t *connector;
-	long deleted = 0;
 
 	node = symbol->to.start;
 	while(node)
 	{
 		connector = (struct connector_t *) node->ptr;
 		/* All new nodes will be added to the end */
-		if(grammar_reduce_is_unitary(connector))
+		if(grammar_reduce_is_unitary(connector) && (!NODE_IS_MARKED(connector->sym, MARK_UNIT)))
 		{
 			debug("Deleting unitary connection %p %s->%s",
 				connector, symbol->name, connector->sym->name);
@@ -1003,7 +1002,7 @@ int grammar_reduce_unitary_symbol(struct grammar_t *g, struct symbol_t *symbol)
 
 			grammar_reduce_unitary_connector(g, connector);
 			/* Delete connection */
-			deleted++;
+			*deleted++;
 			grammar_disconnect_all(connector);
 			if(!symbol->to.start)
 			{
@@ -1016,7 +1015,6 @@ int grammar_reduce_unitary_symbol(struct grammar_t *g, struct symbol_t *symbol)
 
 		node = node->next;
 	}
-	printf("Removed %ld unitary productions\n", deleted);
 	return 0;
 }
 
@@ -1031,10 +1029,11 @@ int grammar_reduce_unitary(struct grammar_t *g)
 	while(node)
 	{
 		symbol = (struct symbol_t *) node->ptr;
-		return_if(grammar_reduce_unitary_symbol(g, symbol), -1);
+		return_if(grammar_reduce_unitary_symbol(g, symbol, &deleted), -1);
 		grammar_reduce_unmark(g);
 		node = node->next;
 	}
+	printf("Removed %ld unitary productions\n", deleted);
 	
 	return 0;
 }
