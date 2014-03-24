@@ -1,0 +1,15 @@
+S=A
+S=A,A
+S=A,A,A
+A=A,B,"a"
+A=A,C,"a"
+A="a"
+B=A,B,"a"
+B=A,"b"
+B=""
+C=C,"a","b"
+C=C,C
+D=C,D
+D=D,"d"
+D=C,E,"a"
+E="b"
