@@ -1002,7 +1002,7 @@ int grammar_reduce_unitary_symbol(struct grammar_t *g, struct symbol_t *symbol, 
 
 			grammar_reduce_unitary_connector(g, connector);
 			/* Delete connection */
-			*deleted++;
+			(*deleted)++;
 			grammar_disconnect_all(connector);
 			if(!symbol->to.start)
 			{
