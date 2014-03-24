@@ -9,6 +9,7 @@
 #define MARK_GEN	1<<6
 #define MARK_REACH	1<<5
 #define MARK_NULL	1<<4
+#define MARK_UNIT	1<<4
 #define MARK_ALL	~0x03
 
 #define SYM_EPSILON	""

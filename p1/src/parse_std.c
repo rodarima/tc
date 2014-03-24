@@ -234,6 +234,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_LEFT FOUND_CHAR_AT " (but expected alpha)\n", 
 					c, c, i);
 				return -10;
@@ -268,6 +269,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_LEFT FOUND_CHAR_AT " (but expected alpha or '%c')\n",
 					c, c, i, SYM_EQUAL);
 				return -11;
@@ -288,6 +290,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha or '%c')\n",
 					c, c, i, SYM_QUOTE);
 				return -12;
@@ -314,6 +317,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else if(c == SYM_NULL)
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c', '%c' or the end)\n",
 					c, c, i, SYM_QUOTE, SYM_SPECIAL);
 				return -13;
@@ -347,6 +351,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or the end)\n",
 					c, c, i, SYM_SEPAR);
 				return -14;
@@ -363,6 +368,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected '%c' or '%c')\n",
 					c, c, i, SYM_SEPAR, SYM_QUOTE);
 				return -15;
@@ -410,6 +416,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 			}
 			else
 			{
+				printf("Rule: [%s]\n", rule);
 				printf(BAD_RIGTH FOUND_CHAR_AT " (but expected alpha, '%c' or the end)\n",
 					c, c, i, SYM_SEPAR);
 				return -16;
@@ -424,6 +431,7 @@ int parse_std_add_rule(const char *rule, struct grammar_t *grammar)
 	}
 
 	/* Or here? */
+	printf("Rule: [%s]\n", rule);
 	printf("Found '\\0' at %d (not expected)\n", i);
 	return -21;
 }

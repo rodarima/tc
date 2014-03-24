@@ -7,6 +7,7 @@
 #include "grammar.h"
 #include "grammar_graphviz.h"
 #include "grammar_reduce.h"
+#include "dbg.h"
 
 #define BUF_MAX	1024
 
@@ -69,25 +70,25 @@ int parse_file(int fd, struct grammar_t *g)
 	grammar_rules_print(g);
 	if(grammar_reduce_e_productions(g))
 	{
-		printf("Failed reduce epsilon-productions\n");
+		debug("Failed reduce epsilon-productions");
 	}
 	//grammar_print(g);
 	//grammar_rules_print(g);
 	if(grammar_reduce_unitary(g))
 	{
-		printf("Failed reduce unitary\n");
+		debug("Failed reduce unitary");
 	}
 	//grammar_print(g);
 	//grammar_rules_print(g);
 	if(grammar_reduce_no_generators(g))
 	{
-		printf("Failed reduce no-generators\n");
+		debug("Failed reduce no-generators");
 	}
 	//grammar_print(g);
 	//grammar_rules_print(g);
 	if(grammar_reduce_unreachables(g))
 	{
-		printf("Failed reduce unreachables\n");
+		debug("Failed reduce unreachables");
 	}
 	//grammar_print(g);
 	grammar_rules_print(g);

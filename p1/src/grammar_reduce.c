@@ -367,7 +367,7 @@ int grammar_reduce_unreachables_mark(struct grammar_t *g)
 
 	if(!g->start)
 	{
-		printf("Fatal: There is not valid start symbol\n");
+		debug("Fatal: There is not valid start symbol");
 		return -1;
 	}
 
@@ -764,6 +764,7 @@ int grammar_reduce_e_productions_remove_epsilon(struct grammar_t *g,
 	struct list_node_t *node, *next;
 	struct connector_t *connector, *tmp, *tmp2;
 	struct symbol_t *symbol;
+	long deleted = 0;
 
 	node = epsilon->from.start;
 	while(node)
@@ -811,8 +812,11 @@ int grammar_reduce_e_productions_remove_epsilon(struct grammar_t *g,
 		}
 		return_if(list_remove(&(g->connectors), connector), -1);
 		grammar_connector_free(connector);
+		deleted++;
 		node = next;
 	}
+
+	printf("Removed %ld null productions\n", deleted);
 	return 0;
 }
 
@@ -935,35 +939,84 @@ int grammar_reduce_unitary_connector(struct grammar_t *g, struct connector_t *c)
 {
 	struct symbol_t *from, *symbol;
 	struct connector_t *connector;
-	struct list_node_t *node, *end;
+	struct list_node_t *node, *node2/*, *end*/;
 
 	from = (struct symbol_t *) c->from;
 	symbol = c->sym;
 
 	node = symbol->to.start;
-	end = symbol->to.end;
+	//end = symbol->to.end;
 	while(node)
 	{
+		node2 = node->next;
 		connector = node->ptr;
+		/* Prevent loops */
 		/* Prevent A=A */
 		debug("Trying connector %p", connector);
 		if((connector->sym != from) || (connector->con))
 		{
 			debug("%s != %s", connector->sym->name, from->name);
-			if(grammar_reduce_unitary_duplicate_path(g, from, connector))
+			if((!connector->con) && NODE_IS_MARKED(connector->sym, MARK_UNIT))
 			{
-				return -1;
+				debug("Loop detected with %s (%p)", connector->sym->name, connector->sym);
+			}
+			else
+			{
+				if(grammar_reduce_unitary_duplicate_path(g, from, connector))
+				{
+					return -1;
+				}
 			}
 		}
 
+		/*
 		if(end == node)
 		{
 			debug("Original end reached, breaking");
 			break;
 		}
-		node = node->next;
+		*/
+		node = node2;
 	}
 	
+	return 0;
+}
+
+int grammar_reduce_unitary_symbol(struct grammar_t *g, struct symbol_t *symbol)
+{
+	struct list_node_t *node, *node2, *next;
+	struct connector_t *connector;
+	long deleted = 0;
+
+	node = symbol->to.start;
+	while(node)
+	{
+		connector = (struct connector_t *) node->ptr;
+		/* All new nodes will be added to the end */
+		if(grammar_reduce_is_unitary(connector))
+		{
+			debug("Deleting unitary connection %p %s->%s",
+				connector, symbol->name, connector->sym->name);
+			
+			debug("Marking %s (%p)", connector->sym->name, connector->sym);
+			NODE_MARK(connector->sym, MARK_UNIT);
+
+			grammar_reduce_unitary_connector(g, connector);
+			/* Delete connection */
+			deleted++;
+			grammar_disconnect_all(connector);
+			if(!symbol->to.start)
+			{
+				debug("WARNING, variable %s isolated", symbol->name);
+			}
+			grammar_connector_free(connector);
+			return_if(list_remove(&(g->connectors), connector), -1);
+			//grammar_rules_print(g);
+		}
+
+		node = node->next;
+	}
+	printf("Removed %ld unitary productions\n", deleted);
 	return 0;
 }
 
@@ -972,33 +1025,16 @@ int grammar_reduce_unitary(struct grammar_t *g)
 	struct list_node_t *node, *next;
 	struct symbol_t *from, *symbol;
 	struct connector_t *connector;
-	
-	node = g->connectors.start;
+	long deleted = 0;
+
+	node = g->variables.start;
 	while(node)
 	{
-		next = node->next;
-		connector = (struct connector_t *) node->ptr;
-		/* All new nodes will be added to the end */
-		if(grammar_reduce_is_unitary(connector))
-		{
-			symbol = (struct symbol_t *) connector->from;
-			debug("Deleting unitary connection %p %s->%s",
-				connector, symbol->name, connector->sym->name);
-
-			grammar_reduce_unitary_connector(g, connector);
-			/* Delete connection */
-			from = connector->from;
-			grammar_disconnect_all(connector);
-			if(!from->to.start)
-			{
-				debug("WARNING, variable %s isolated", from->name);
-			}
-			grammar_connector_free(connector);
-			list_remove_node(&(g->connectors), node);
-			grammar_rules_print(g);
-		}
-
-		node = next;
+		symbol = (struct symbol_t *) node->ptr;
+		return_if(grammar_reduce_unitary_symbol(g, symbol), -1);
+		grammar_reduce_unmark(g);
+		node = node->next;
 	}
+	
 	return 0;
 }
