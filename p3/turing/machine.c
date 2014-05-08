@@ -5,6 +5,7 @@
 #define MAX_TRANS	(2*1024)
 #define MAX_TAPE	(2*1024)
 #define POS_INIT	(MAX_TAPE/2)
+#define SYM_EMPTY	'\0'
 
 struct trans_t
 {
@@ -57,6 +58,29 @@ int machine_position(int position, char direction)
 	return position;
 }
 
+void machine_status(struct machine_t *m)
+{
+	int i=0;
+	while(i < m->pos)
+	{
+		if(m->tape[i] != SYM_EMPTY)
+		{
+			printf("%c\t", m->tape[i]);
+		}
+		i++;
+	}
+	printf("s%d\t", m->st_now);
+	while(i < MAX_TAPE)
+	{
+		if(m->tape[i] != SYM_EMPTY)
+		{
+			printf("%c\t", m->tape[i]);
+		}
+		i++;
+	}
+	printf("\n");
+}
+
 int machine_step(struct machine_t *m)
 {
 	int i;
@@ -71,12 +95,13 @@ int machine_step(struct machine_t *m)
 
 		if((m->st_now == trans->st_r) && (actual == trans->r))
 		{
-			printf("A-st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
+			//printf("A-st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
 			m->st_now = trans->st_w;
 			m->tape[m->pos] = trans->w;
 			m->pos = machine_position(m->pos, trans->dir);
-			printf("B-st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
-			printf("TAPE: %s\n", &(m->tape[POS_INIT]));
+			//printf("B-st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
+			//printf("TAPE: %s\n", &(m->tape[POS_INIT]));
+			machine_status(m);
 			break;
 		}
 	}
@@ -148,12 +173,13 @@ int main(int argc, char *argv[])
 	m->st_now = 0;
 	m->st_end = 8;
 
-	memcpy(&(m->tape[POS_INIT]), ">aaabbbcccc", 11);
+	memcpy(&(m->tape[POS_INIT]), ">aaabbbccc", 10);
 	m->pos = POS_INIT+1;
 	
-	printf("TAPE: %s\n", &(m->tape[POS_INIT]));
-	printf("st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
+	//printf("TAPE: %s\n", &(m->tape[POS_INIT]));
+	//printf("st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
 
+	machine_status(m);
 	while(machine_step(m));
 
 	msg("Terminó");
