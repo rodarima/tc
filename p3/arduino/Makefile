@@ -69,8 +69,8 @@ CDEFS = -DF_CPU=$(F_CPU) -DARDUINO=$(ARDUINO_VERSION)
 CXXDEFS = -DF_CPU=$(F_CPU) -DARDUINO=$(ARDUINO_VERSION)
 
 # Place -I options here
-CINCS = $(shell for path in $(ARDUINO_LOCAL_SRC); do echo -n "-I$$path "; done)
-CXXINCS = $(shell for path in $(ARDUINO_LOCAL_SRC); do echo -n "-I$$path "; done)
+CINCS = $(shell for path in $(ARDUINO_LOCAL_SRC); do echo -n "-I$$path "; done) -I./
+CXXINCS = $(shell for path in $(ARDUINO_LOCAL_SRC); do echo -n "-I$$path "; done) -I./
 
 # Compiler and linker options from Arduino IDE
 CFLAGS = -g -Os -w -ffunction-sections -fdata-sections -mmcu=$(MCU) $(CDEFS) $(CINCS)
