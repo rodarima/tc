@@ -149,7 +149,16 @@ void machine_example(struct machine_t *m)
 	m->st_now = 0;
 	m->st_end = 8;
 
-	memcpy(&(m->tape[POS_INIT]), "\x07\x01\x01\x01\x02\x02\x02\x03\x03\x03", 10);
+	//memcpy(&(m->tape[POS_INIT]), "\x07\x01\x01\x01\x02\x02\x02\x03\x03\x03", 10);
+#define N 4
+	int i;
+	m->tape[POS_INIT] = 0x07;
+	for (i=0; i<N; i++)
+	{
+		m->tape[POS_INIT +1 + i] = 0x01;
+		m->tape[POS_INIT +1 + i + N] = 0x02;
+		m->tape[POS_INIT +1 + i + 2*N] = 0x03;
+	}
 	m->pos = POS_INIT+1;
 	
 	//printf("TAPE: %s\n", &(m->tape[POS_INIT]));

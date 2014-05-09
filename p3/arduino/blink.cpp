@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <alpha.h>
 #include <machine.h>
-#include "suma.h"
 
 int led1 = 5, led2 = 6, led3 = 7;
 
@@ -142,23 +141,31 @@ void wheel()
 {
 	wheel_pos = (wheel_pos+1) % 6;
 	put(19 + wheel_pos);
-	delay(30);
+	delay(20);
 }
 
 void run_turing()
 {
-	m->st_now = m->st_init;
+	int i=0,but;
 	while(read_buttons());
 	delay(200);
-	while((!read_buttons()) && (machine_step(m)))
+	while((!(but=read_buttons())) && (machine_step(m)))
 	{
-		wheel();
+		//if(++i>1000)
+		{
+			wheel();
+			i=0;
+		}
 	}
 	if(m->st_now == m->st_end)
 	{
 		put(2);
-		while(!read_buttons());
 	}
+	if((but) && (!(but & BUTTON_OK)))
+	{
+		m->st_now = m->st_init;
+	}
+	while(!read_buttons());
 }
 
 void loop()
