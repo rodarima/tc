@@ -105,7 +105,7 @@ void insert()
 	while(insert_mode)
 	{
 		buttons_st = read_buttons();
-		if((buttons_st) && (buttons_st != buttons_last_st))
+		if(buttons_st)
 		{
 			if(buttons_st & BUTTON_CENTER)
 			{
@@ -113,11 +113,11 @@ void insert()
 			}
 			if(buttons_st & BUTTON_LEFT)
 			{
-				tape[index] = (tape[index]+9) % 10;
+				tape[index] = (tape[index]+11-1) % 11;
 			}
 			if(buttons_st & BUTTON_RIGHT)
 			{
-				tape[index] = (tape[index]+1) % 10;
+				tape[index] = (tape[index]+1) % 11;
 			}
 
 			put(tape[index]);
@@ -156,7 +156,9 @@ void loop()
 		}
 		Serial.println(buttons_st);
 
-		beep(dot_led, 200);
+		put(tape[index]);
+		beep(dot_led, 100);
+		delay(100);
 
 		/* Multi click */
 		//delay(200);
