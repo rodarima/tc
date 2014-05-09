@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <alpha.h>
+#include <machine.h>
+#include "suma.h"
 
 int led1 = 5, led2 = 6, led3 = 7;
 
@@ -30,9 +32,12 @@ byte seven_seg_digits[10][7] =
 
 //int leds[MAX_LEDS] = { 2, 3, 4, 5, 10, 11, 12, 13 };
 
+
 int leds[MAX_LEDS] = { 11,13,10,12,5,3,4 };
 int dot_led = 2;
 int buttons[MAX_BUTTONS] = { 9, 8, 7, 6 };
+struct machine_t machine;
+struct machine_t *m = &machine;
 
 void setup()
 {
@@ -47,6 +52,9 @@ void setup()
 		pinMode(buttons[i], INPUT);
 	}
 	pinMode(dot_led, OUTPUT);
+
+	machine_init(m);
+	machine_example(m);
 }
 
 void put(int c)
@@ -87,10 +95,8 @@ int read_buttons()
 	return status;
 }
 
-int index = 0;
 int buttons_last_st = 0;
 int ticks_button = 0;
-char tape[1024] = {0};
 
 void insert()
 {
@@ -113,14 +119,14 @@ void insert()
 			}
 			if(buttons_st & BUTTON_LEFT)
 			{
-				tape[index] = (tape[index]+11-1) % 11;
+				m->tape[m->pos] = (m->tape[m->pos]+11-1) % 11;
 			}
 			if(buttons_st & BUTTON_RIGHT)
 			{
-				tape[index] = (tape[index]+1) % 11;
+				m->tape[m->pos] = ((m->tape[m->pos])+1)%11;
 			}
 
-			put(tape[index]);
+			put(machine_char(m));
 			digitalWrite(dot_led, LOW);
 			delay(200);
 			digitalWrite(dot_led, HIGH);
@@ -131,12 +137,35 @@ void insert()
 	digitalWrite(dot_led, LOW);
 }
 
+int wheel_pos = 0;
+void wheel()
+{
+	wheel_pos = (wheel_pos+1) % 6;
+	put(19 + wheel_pos);
+	delay(30);
+}
+
+void run_turing()
+{
+	m->st_now = m->st_init;
+	while(read_buttons());
+	delay(200);
+	while((!read_buttons()) && (machine_step(m)))
+	{
+		wheel();
+	}
+	if(m->st_now == m->st_end)
+	{
+		put(2);
+		while(!read_buttons());
+	}
+}
+
 void loop()
 {
 	int buttons_st;
 
-	put(tape[index]);
-	delay(1);
+	put(machine_char(&machine));
 
 	buttons_st = read_buttons();
 	if(buttons_st)
@@ -148,25 +177,21 @@ void loop()
 		}
 		if(buttons_st & BUTTON_LEFT)
 		{
-			index = (index+1024-1) % 1024;
+			m->pos = (m->pos+MAX_TAPE-1) % MAX_TAPE;
 		}
 		if(buttons_st & BUTTON_RIGHT)
 		{
-			index = (index+1) % 1024;
+			m->pos = (m->pos+1) % MAX_TAPE;
 		}
-		Serial.println(buttons_st);
+		if(buttons_st & BUTTON_OK)
+		{
+			Serial.println("Goooooooooo!");
+			run_turing();
+		}
 
-		put(tape[index]);
+		put(machine_char(m));
 		beep(dot_led, 100);
 		delay(100);
-
-		/* Multi click */
-		//delay(200);
-		/*clear();
-		delay(100);
-		put(tape[index]);
-		delay(100);*/
-
 	}
 	buttons_last_st = buttons_st;
 }
