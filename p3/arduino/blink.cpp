@@ -7,6 +7,7 @@ int led1 = 5, led2 = 6, led3 = 7;
 #define MAX_LEDS	7
 #define MAX_BUTTONS	4
 #define MAX_TICKS_BUTTON 100
+#define MAX_CHAR	16
 
 #define BUTTON_LEFT	0x01
 #define BUTTON_CENTER	0x02
@@ -56,16 +57,26 @@ void setup()
 	machine_example(m);
 }
 
-void put(int c)
+void _put(byte *b)
 {
-	byte *a = alpha_seg[c];
-
 	int i;
 	for (i=0; i<7; i++)
 	{
-		digitalWrite(leds[i], a[i]);
+		digitalWrite(leds[i], b[i]);
 	}
 }
+void put(int c)
+{
+	_put(hex_seg[c]);
+}
+
+int char_next(int c, int d)
+{
+	int t = c + d;
+	while(t<0) t+=MAX_CHAR;
+	return t%MAX_CHAR;
+}
+
 void clear()
 {
 	int i;
@@ -118,11 +129,11 @@ void insert()
 			}
 			if(buttons_st & BUTTON_LEFT)
 			{
-				m->tape[m->pos] = (m->tape[m->pos]+11-1) % 11;
+				m->tape[m->pos] = char_next(m->tape[m->pos], -1);
 			}
 			if(buttons_st & BUTTON_RIGHT)
 			{
-				m->tape[m->pos] = ((m->tape[m->pos])+1)%11;
+				m->tape[m->pos] = char_next(m->tape[m->pos], +1);
 			}
 
 			put(machine_char(m));
@@ -140,16 +151,16 @@ int wheel_pos = 0;
 void wheel()
 {
 	wheel_pos = (wheel_pos+1) % 6;
-	put(19 + wheel_pos);
+	_put(alpha_seg[19 + wheel_pos]);
 	delay(20);
 }
 
 void run_turing()
 {
-	int i=0,but;
+	int i=0,but,step;
 	while(read_buttons());
 	delay(200);
-	while((!(but=read_buttons())) && (machine_step(m)))
+	while((!(read_buttons() & BUTTON_OK)) && (step=machine_step(m)))
 	{
 		//if(++i>1000)
 		{
@@ -157,22 +168,23 @@ void run_turing()
 			i=0;
 		}
 	}
-	if(m->st_now == m->st_end)
+	if((!step) && (m->st_now == m->st_end))
 	{
-		put(2);
+		put(1);
 	}
-	if((but) && (!(but & BUTTON_OK)))
+	delay(300);
+	while(!read_buttons());
+	if(read_buttons() & BUTTON_OK)
 	{
 		m->st_now = m->st_init;
 	}
-	while(!read_buttons());
 }
 
 void loop()
 {
 	int buttons_st;
 
-	put(machine_char(&machine));
+	put(machine_char(m));
 
 	buttons_st = read_buttons();
 	if(buttons_st)
