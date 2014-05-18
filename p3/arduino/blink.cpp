@@ -28,6 +28,8 @@ byte seven_seg_digits[10][7] =
 	{ 1,1,1,0,0,1,1 }   // = 9
 };
 
+byte hex_str[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
 
 
 //int leds[MAX_LEDS] = { 2, 3, 4, 5, 10, 11, 12, 13 };
@@ -147,6 +149,36 @@ void insert()
 	digitalWrite(dot_led, LOW);
 }
 
+void machine_status_arduino(struct machine_t *m)
+{
+	int i=0;
+	while(i < m->pos)
+	{
+		if(m->tape[i] != SYM_EMPTY)
+		{
+			Serial.print(m->tape[i], 16);
+			Serial.print('\t');
+			//printf("%c\t", m->tape[i]);
+		}
+		i++;
+	}
+	//printf("s%d\t", m->st_now);
+	Serial.print('s');
+	Serial.print(m->st_now);
+	Serial.print('\t');
+	while(i < MAX_TAPE)
+	{
+		if(m->tape[i] != SYM_EMPTY)
+		{
+			Serial.print(m->tape[i], 16);
+			Serial.print('\t');
+			//printf("%c\t", m->tape[i]);
+		}
+		i++;
+	}
+	Serial.println();
+}
+
 int wheel_pos = 0;
 void wheel()
 {
@@ -160,17 +192,22 @@ void run_turing()
 	int i=0,but,step;
 	while(read_buttons());
 	delay(200);
-	while((!(read_buttons() & BUTTON_OK)) && (step=machine_step(m)))
+	while((!(read_buttons() & BUTTON_OK)) && (1==(step=machine_step(m))))
 	{
+		machine_status_arduino(m);
 		//if(++i>1000)
 		{
 			wheel();
 			i=0;
 		}
 	}
-	if((!step) && (m->st_now == m->st_end))
+	if(step == 0)
 	{
 		put(1);
+	}
+	else if(step == -1)
+	{
+		put(0);
 	}
 	delay(300);
 	while(!read_buttons());

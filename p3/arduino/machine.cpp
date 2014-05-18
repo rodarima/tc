@@ -77,11 +77,11 @@ int machine_step(struct machine_t *m)
 			//printf("B-st_now=%d\ttape[pos]=%c\tpos=%d\n", m->st_now, m->tape[m->pos], m->pos);
 			//printf("TAPE: %s\n", &(m->tape[POS_INIT]));
 			machine_status(m);
-			break;
+			return 1;
 		}
 	}
 
-	return 1;
+	return -1;
 }
 
 char machine_char(struct machine_t *m)
